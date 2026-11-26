@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://input.so/agent-talk/v1/schemas/common.schema.json",
+    "$id": "https://www.input.so/agent-talk/v1/schemas/common.schema.json",
     "title": "Agent Talk shared grammars",
     "description": "The names, addresses, times and scopes every other Agent Talk schema refers to. Lengths count characters; the reference implementation counts UTF-16 code units, so a string with characters outside the Basic Multilingual Plane can pass a schema and still break a limit in code.",
     "$defs": {

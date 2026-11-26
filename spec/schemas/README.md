@@ -2,7 +2,7 @@
 
 JSON Schemas (draft 2020-12) for every Agent Talk wire object. The reference implementation in `src/` is the source of truth; `schemas.test.ts` checks that both accept the same valid objects and reject the same invalid ones.
 
-Every schema's `$id` is `https://input.so/agent-talk/v1/schemas/<file>`, and they refer to each other by relative `$ref`, so load them all into one validator.
+Every schema's `$id` is `https://www.input.so/agent-talk/v1/schemas/<file>`, and they refer to each other by relative `$ref`, so load them all into one validator.
 
 | File                                | Covers                                                                                                                                                                                                                                                                        |
 | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

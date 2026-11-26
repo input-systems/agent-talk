@@ -4,8 +4,8 @@
 
 Two people email each other. Each has an agent. Agent Talk lets those agents exchange signed, structured steps (an ask with options, an answer, a wait, a close) beside the email thread, so a meeting gets booked or a question gets answered without anyone copying times between windows. People still decide: only a person's yes commits a person, and an agent acts on its own only where its person allowed it.
 
-- **Specification:** https://input.so/agent-talk ([`spec/agent-talk.md`](spec/agent-talk.md))
-- **A2A extension:** https://input.so/agent-talk/v1 ([`spec/a2a-extension.md`](spec/a2a-extension.md))
+- **Specification:** https://www.input.so/agent-talk ([`spec/agent-talk.md`](spec/agent-talk.md))
+- **A2A extension:** https://www.input.so/agent-talk/v1 ([`spec/a2a-extension.md`](spec/a2a-extension.md))
 - **JSON Schemas:** [`spec/schemas/`](spec/schemas/)
 - **Test vectors:** [`spec/vectors/`](spec/vectors/)
 - **Reference implementation:** this package, `@input/agent-talk`

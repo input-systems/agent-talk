@@ -3,10 +3,10 @@
 Version 1, draft 1, 26 November 2026. Edited by Input.
 
 ```text
-https://input.so/agent-talk/v1
+https://www.input.so/agent-talk/v1
 ```
 
-This is the page behind the URI above. It defines how two services exchange Agent Talk steps over A2A 1.0. The rules about what a step means, who may take one and when an agent may act are in the protocol, at https://input.so/agent-talk; section 9 there is the normative summary of this page.
+This is the page behind the URI above. It defines how two services exchange Agent Talk steps over A2A 1.0. The rules about what a step means, who may take one and when an agent may act are in the protocol, at https://www.input.so/agent-talk; section 9 there is the normative summary of this page.
 
 The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119 and RFC 8174 when, and only when, they appear in capitals.
 
@@ -38,7 +38,7 @@ A service lists the extension in its Agent Card, served at `https://<issuer>/.we
         "pushNotifications": false,
         "extensions": [
             {
-                "uri": "https://input.so/agent-talk/v1",
+                "uri": "https://www.input.so/agent-talk/v1",
                 "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
                 "required": true,
                 "params": {
@@ -103,7 +103,7 @@ Every request MUST carry both headers:
 
 ```http
 A2A-Version: 1.0
-A2A-Extensions: https://input.so/agent-talk/v1
+A2A-Extensions: https://www.input.so/agent-talk/v1
 ```
 
 The server checks them before it reads anything else:
@@ -113,7 +113,7 @@ The server checks them before it reads anything else:
 | `A2A-Version` absent or not `1.0`       | JSON-RPC error `-32009` (`VersionNotSupportedError`)      |
 | `A2A-Extensions` does not name this URI | JSON-RPC error `-32008` (`ExtensionSupportRequiredError`) |
 
-The response echoes `A2A-Extensions: https://input.so/agent-talk/v1`. A request body over 64 KiB is refused before it is parsed.
+The response echoes `A2A-Extensions: https://www.input.so/agent-talk/v1`. A request body over 64 KiB is refused before it is parsed.
 
 ## 4. Authentication
 
@@ -138,7 +138,7 @@ Every step travels as one `SendMessage`. The message carries the step twice: in 
             "messageId": "st_9f2a",
             "contextId": "tk_41c7",
             "role": "ROLE_USER",
-            "extensions": ["https://input.so/agent-talk/v1"],
+            "extensions": ["https://www.input.so/agent-talk/v1"],
             "parts": [
                 { "text": "Does Thursday 14:00 or Friday 10:00 work for a call?" },
                 {
@@ -166,7 +166,7 @@ Every step travels as one `SendMessage`. The message carries the step twice: in 
                     "mediaType": "application/agent-talk+json"
                 }
             ],
-            "metadata": { "https://input.so/agent-talk/v1": { "carrier": "a2a" } }
+            "metadata": { "https://www.input.so/agent-talk/v1": { "carrier": "a2a" } }
         }
     }
 }
@@ -299,7 +299,7 @@ The response SHOULD take the same time whatever the reason. A client learns noth
 
 ## 8. Security
 
-The protocol's security considerations (section 11 of https://input.so/agent-talk) apply in full. For this extension in particular:
+The protocol's security considerations (section 11 of https://www.input.so/agent-talk) apply in full. For this extension in particular:
 
 - **No fetch on arrival.** Neither a card, a key set nor a delegation is fetched because a request or a message arrived.
 - **Enumeration.** The uniform refusal, the single response for addresses without an open door, and no lookup method.

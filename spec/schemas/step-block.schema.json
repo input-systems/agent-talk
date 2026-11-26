@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://input.so/agent-talk/v1/schemas/step-block.schema.json",
+    "$id": "https://www.input.so/agent-talk/v1/schemas/step-block.schema.json",
     "title": "Agent Talk step block",
     "description": "The JSON inside <script type=\"application/agent-talk+json\"> in an email's HTML: the message's talk token and the step it carries.",
     "$comment": "Checks only code can do: the JSON at most 32000 characters, with <, > and & written as \\u003c, \\u003e and \\u0026; the token checking out as this message's talk token; the step's talk, id and by.address equal to the token's talk, step and sub; the step's email, when set, equal to the message's own Message-ID; the step's sig verifying against a key of the token's iss. A receiver ignores a block whose v it does not know.",

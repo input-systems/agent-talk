@@ -1,6 +1,6 @@
 # Agent Talk
 
-Draft 1, 26 November 2026. Edited by Input. Home: https://input.so/agent-talk
+Draft 1, 26 November 2026. Edited by Input. Home: https://www.input.so/agent-talk
 
 The key words MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as in RFC 2119 and RFC 8174 when, and only when, they appear in capitals.
 
@@ -18,7 +18,7 @@ The protocol has three parts:
 
 - **The model**: talks, steps, asks, the card, and the rules every implementation follows (sections 3 to 7).
 - **The email binding**: how presence, talks and steps travel in mail (section 8).
-- **The A2A binding**: how two services exchange the same steps directly, as a profile extension of A2A 1.0 (section 9, and the extension page at https://input.so/agent-talk/v1).
+- **The A2A binding**: how two services exchange the same steps directly, as a profile extension of A2A 1.0 (section 9, and the extension page at https://www.input.so/agent-talk/v1).
 
 A reference implementation in TypeScript, JSON Schemas for every object, and test vectors are published with this document.
 
@@ -475,12 +475,12 @@ For the receiver:
 
 ## 9. A2A binding
 
-Two services MAY exchange steps directly over A2A 1.0, using JSON-RPC 2.0 over HTTPS. This section is the normative summary; the extension page at https://input.so/agent-talk/v1 gives the full wire detail with examples.
+Two services MAY exchange steps directly over A2A 1.0, using JSON-RPC 2.0 over HTTPS. This section is the normative summary; the extension page at https://www.input.so/agent-talk/v1 gives the full wire detail with examples.
 
 The binding is a **profile extension**: it constrains what messages carry and what task ids mean. It adds no A2A methods and no task states. Its URI is the version:
 
 ```text
-https://input.so/agent-talk/v1
+https://www.input.so/agent-talk/v1
 ```
 
 ### 9.1 Discovery
@@ -489,7 +489,7 @@ A service publishes a signed A2A Agent Card at `https://<issuer>/.well-known/age
 
 ```json
 {
-    "uri": "https://input.so/agent-talk/v1",
+    "uri": "https://www.input.so/agent-talk/v1",
     "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
     "required": true,
     "params": {
@@ -618,7 +618,7 @@ There is no shared secret, no handshake and no per-peer credential: the receiver
 A receiver checks, in this order, before it reads anything else:
 
 1. `A2A-Version` is `1.0`. Otherwise JSON-RPC error `-32009` (`VersionNotSupportedError`). An absent header means A2A 0.3, which this binding does not speak.
-2. `A2A-Extensions` names `https://input.so/agent-talk/v1`. Otherwise `-32008` (`ExtensionSupportRequiredError`).
+2. `A2A-Extensions` names `https://www.input.so/agent-talk/v1`. Otherwise `-32008` (`ExtensionSupportRequiredError`).
 
 A response echoes `A2A-Extensions`. A request body over 64 KiB is refused before it is parsed.
 

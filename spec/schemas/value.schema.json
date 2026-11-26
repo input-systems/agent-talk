@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://input.so/agent-talk/v1/schemas/value.schema.json",
+    "$id": "https://www.input.so/agent-talk/v1/schemas/value.schema.json",
     "title": "Agent Talk value",
     "description": "A value a step asks for, hands over or records. Every value carries its own text, so a receiver shows the text of a type it does not know: a private one (x-…) or one a later version added.",
     "$comment": "Not expressible here: a time's end after its start, and a busy value's blocks inside from and to (the code checks end > start for time only). Unknown properties are allowed: receivers ignore fields they do not know.",

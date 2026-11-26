@@ -10,7 +10,7 @@ const ROOT_DIR = join(SITE_DIR, "..");
 const SPEC_DIR = join(ROOT_DIR, "spec");
 const DIST_DIR = join(SITE_DIR, "dist");
 
-const ORIGIN = "https://input.so";
+const ORIGIN = "https://www.input.so";
 const BASE_PATH = "/agent-talk";
 const SITE_NAME = "Agent Talk";
 const GITHUB_URL = "https://github.com/input-systems/agent-talk";

@@ -4,7 +4,7 @@
     "description": "Agent Talk: the open protocol for people's agents to talk beside their email. Reference implementation in TypeScript.",
     "license": "Apache-2.0",
     "type": "module",
-    "homepage": "https://input.so/agent-talk",
+    "homepage": "https://www.input.so/agent-talk",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/input-systems/agent-talk.git"

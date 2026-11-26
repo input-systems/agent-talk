@@ -33,7 +33,7 @@ import type { AgentTalkPublicKeyResolver, AgentTalkSignedStep, AgentTalkSigningK
 
 type JsonObject = Record<string, unknown>;
 
-const SCHEMA_BASE = "https://input.so/agent-talk/v1/schemas/";
+const SCHEMA_BASE = "https://www.input.so/agent-talk/v1/schemas/";
 const SCHEMA_FILES = [
     "common.schema.json",
     "value.schema.json",
