@@ -1,21 +1,38 @@
-# Agent Talk
+<!-- markdownlint-disable MD033 MD041 -->
+<img width="100%" height="auto" alt="Agent Talk" src=".github/assets/agent-talk-banner.png" />
 
-**An open protocol for people's agents to talk over email.**
+<h3 align="center">
+  Open protocol for AI agents to talk<br/> over email. Signed. People decide.
+</h3>
 
-Two people email each other. Each has an agent. Agent Talk lets those agents exchange signed, structured steps (an ask with options, an answer, a wait, a close) beside the email thread, so a meeting gets booked or a question gets answered without anyone copying times between windows. People still decide: only a person's yes commits a person, and an agent acts on its own only where its person allowed it.
+<p align="center">
+  <a href="https://www.npmjs.com/package/@input/agent-talk"><img src="https://img.shields.io/npm/v/@input/agent-talk?style=flat&color=00C2FF" alt="npm version" /></a>
+  <a href="https://github.com/input-systems/agent-talk/stargazers"><img src="https://img.shields.io/github/stars/input-systems/agent-talk?style=flat&color=8D30FF" alt="GitHub stars" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-FF2B6E" alt="license" /></a>
+</p>
+<!-- markdownlint-enable MD033 MD041 -->
+
+**Agent Talk is an open protocol** for the agents of people who email each other. Two people email; each has an agent. Agent Talk lets those agents exchange signed, structured steps (an ask with options, an answer, a wait, a close) beside the email thread, so a meeting gets booked or a question gets answered without anyone copying times between windows.
+
+## Why Agent Talk
+
+**People decide.** Only a person's yes commits a person. An agent acts on its own only where its person allowed it, within narrow, named scopes, and a turn limit stops two agents from running a talk without a person.
+
+**Email is the record.** Every step a person takes travels as an ordinary email the other side can read without any software from this protocol. The step itself rides along in the email's HTML as one signed JSON block, with a header and a link for people.
+
+**Agents can go direct.** Each service publishes a signed service document naming its keys and the carriers it takes steps on. When the other side lists the `https` carrier, the same steps also travel directly: one signed step per request.
+
+**Reading tells the sender nothing.** A receiver reads the step from the email it arrived in and fetches nothing because a message arrived. There is no way to ask whether an address has an agent.
+
+**Text is data.** Every string from the other side is untrusted. A step can trigger nothing except an answer to an open ask.
+
+## Specification
 
 - **Website:** https://www.input.so/agent-talk
-- **Specification:** https://talk.input.so ([`spec/agent-talk.md`](spec/agent-talk.md))
+- **Protocol:** https://talk.input.so ([`spec/agent-talk.md`](spec/agent-talk.md))
 - **JSON Schemas:** [`spec/schemas/`](spec/schemas/)
 - **Test vectors:** [`spec/vectors/`](spec/vectors/)
 - **Reference implementation:** this package, `@input/agent-talk`
-
-## How it works
-
-- **Email is the record.** Every step a person takes travels as an ordinary email the other side can read without any software from this protocol. The step itself rides along in the email's HTML as one signed JSON block, with a header and a link for people.
-- **Agents can go direct.** Each service publishes a signed service document naming its keys and the carriers it takes steps on. When the other side lists the `https` carrier, the same steps also travel directly: one signed step per request.
-- **Reading tells the sender nothing.** A receiver reads the step from the email it arrived in and fetches nothing because a message arrived. There is no way to ask whether an address has an agent.
-- **Text is data.** Every string from the other side is untrusted. A step can trigger nothing except an answer to an open ask, and a turn limit stops two agents from running a talk without a person.
 
 ## Install
 
