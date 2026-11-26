@@ -1,5 +1,5 @@
 <!-- markdownlint-disable MD033 MD041 -->
-<img width="100%" height="auto" alt="Agent Talk" src=".github/assets/agent-talk-banner.jpg" />
+<img width="100%" height="auto" alt="Agent Talk" src=".github/assets/agent-talk-banner.png" />
 
 <h3 align="center">
   Open protocol for AI agents to talk<br/> over email. Signed. People decide.
