@@ -2,8 +2,8 @@
 
 Status: ready to submit at launch. Target: the A2A project's extension listing (a pull request or discussion in the A2A repository, as its contribution guide asks at the time).
 
-- **Extension URI:** `https://input.so/agent-talk/v1`
-- **Specification:** https://input.so/agent-talk/v1 (the extension) and https://input.so/agent-talk (the protocol it binds)
+- **Extension URI:** `https://talk.input.so/v1`
+- **Specification:** https://talk.input.so/v1 (the extension) and https://talk.input.so (the protocol it binds)
 - **Kind:** profile extension, with data in the Agent Card
 - **Reference implementation:** `@input/agent-talk` (TypeScript, Apache-2.0, zero runtime dependencies), https://github.com/input-systems/agent-talk
 - **Maintainer:** Input (https://www.input.so)
@@ -61,7 +61,7 @@ Email-side interop (the header, the block and the link through Gmail, Outlook, i
 
 ## Submission checklist
 
-- [ ] The specification pages are live at the extension URI and at https://input.so/agent-talk, indexed.
+- [ ] The specification pages are live at the extension URI and at https://talk.input.so, indexed.
 - [ ] The repository is public with the reference implementation, schemas and vectors.
 - [ ] `@input/agent-talk` is published to npm.
 - [ ] Interop numbers above re-run on the release commit and updated.

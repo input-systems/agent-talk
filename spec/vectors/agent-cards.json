@@ -27,7 +27,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -69,7 +69,7 @@
           "kid": "north-2026-11",
           "typ": "JOSE"
         },
-        "canonicalPayload": "{\"capabilities\":{\"extensions\":[{\"description\":\"Agent talk: signed steps between people's agents, the same steps email carries.\",\"params\":{\"addressCard\":\"https://north.example/.well-known/agent-talk/address-card\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\"},\"required\":true,\"uri\":\"https://input.so/agent-talk/v1\"}],\"pushNotifications\":false,\"streaming\":false},\"defaultInputModes\":[\"application/agent-talk+json\",\"text/plain\"],\"defaultOutputModes\":[\"application/agent-talk+json\",\"text/plain\"],\"description\":\"North's agent talk service.\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"securityRequirements\":[{\"schemes\":{\"agentTalkServiceToken\":{}}}],\"securitySchemes\":{\"agentTalkServiceToken\":{\"httpAuthSecurityScheme\":{\"bearerFormat\":\"JWT\",\"description\":\"An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti.\",\"scheme\":\"Bearer\"}}},\"skills\":[],\"supportedInterfaces\":[{\"protocolBinding\":\"JSONRPC\",\"protocolVersion\":\"1.0\",\"url\":\"https://north.example/a2a\"}],\"version\":\"1.0.0\"}",
+        "canonicalPayload": "{\"capabilities\":{\"extensions\":[{\"description\":\"Agent talk: signed steps between people's agents, the same steps email carries.\",\"params\":{\"addressCard\":\"https://north.example/.well-known/agent-talk/address-card\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\"},\"required\":true,\"uri\":\"https://talk.input.so/v1\"}],\"pushNotifications\":false,\"streaming\":false},\"defaultInputModes\":[\"application/agent-talk+json\",\"text/plain\"],\"defaultOutputModes\":[\"application/agent-talk+json\",\"text/plain\"],\"description\":\"North's agent talk service.\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"securityRequirements\":[{\"schemes\":{\"agentTalkServiceToken\":{}}}],\"securitySchemes\":{\"agentTalkServiceToken\":{\"httpAuthSecurityScheme\":{\"bearerFormat\":\"JWT\",\"description\":\"An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti.\",\"scheme\":\"Bearer\"}}},\"skills\":[],\"supportedInterfaces\":[{\"protocolBinding\":\"JSONRPC\",\"protocolVersion\":\"1.0\",\"url\":\"https://north.example/a2a\"}],\"version\":\"1.0.0\"}",
         "signedCard": {
           "name": "North",
           "description": "North's agent talk service.",
@@ -90,7 +90,7 @@
             "pushNotifications": false,
             "extensions": [
               {
-                "uri": "https://input.so/agent-talk/v1",
+                "uri": "https://talk.input.so/v1",
                 "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
                 "required": true,
                 "params": {
@@ -128,7 +128,7 @@
           "signatures": [
             {
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-              "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+              "signature": "in8RNUKM27CQxniTh5lKtRFsp0RGnbYjmm0UFA8mhyz0ITnlZ-r0_9i1qGAFWI2ib3FgdemnU1FqYkO20Rl_AQ"
             }
           ]
         }
@@ -158,7 +158,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -196,7 +196,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+            "signature": "in8RNUKM27CQxniTh5lKtRFsp0RGnbYjmm0UFA8mhyz0ITnlZ-r0_9i1qGAFWI2ib3FgdemnU1FqYkO20Rl_AQ"
           }
         ]
       },
@@ -223,7 +223,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+            "signature": "in8RNUKM27CQxniTh5lKtRFsp0RGnbYjmm0UFA8mhyz0ITnlZ-r0_9i1qGAFWI2ib3FgdemnU1FqYkO20Rl_AQ"
           }
         ],
         "skills": [],
@@ -256,7 +256,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -320,7 +320,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -358,7 +358,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+            "signature": "in8RNUKM27CQxniTh5lKtRFsp0RGnbYjmm0UFA8mhyz0ITnlZ-r0_9i1qGAFWI2ib3FgdemnU1FqYkO20Rl_AQ"
           }
         ]
       },
@@ -401,7 +401,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -439,7 +439,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+            "signature": "in8RNUKM27CQxniTh5lKtRFsp0RGnbYjmm0UFA8mhyz0ITnlZ-r0_9i1qGAFWI2ib3FgdemnU1FqYkO20Rl_AQ"
           }
         ]
       },
@@ -482,7 +482,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -557,7 +557,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -633,7 +633,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -671,7 +671,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "rOgnslQ1UcUu3oro_SOQ01W00q9vHoXeapoXFdtAytI7jP32kZR54Yu6_M6_atpWbz16CD04tKJsPsMpSeBjBg"
+            "signature": "FfHafI7fcCFo2U8AeUWLnFpb2rkbCn0W_LLCY4lruWo1_uiVlqpLP7PRbKC1WORH6vn6MrsEAruWvL-Laa3MBA"
           }
         ]
       },
@@ -714,7 +714,7 @@
           "pushNotifications": false,
           "extensions": [
             {
-              "uri": "https://input.so/agent-talk/v1",
+              "uri": "https://talk.input.so/v1",
               "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
               "required": true,
               "params": {
@@ -752,11 +752,11 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "rOgnslQ1UcUu3oro_SOQ01W00q9vHoXeapoXFdtAytI7jP32kZR54Yu6_M6_atpWbz16CD04tKJsPsMpSeBjBg"
+            "signature": "FfHafI7fcCFo2U8AeUWLnFpb2rkbCn0W_LLCY4lruWo1_uiVlqpLP7PRbKC1WORH6vn6MrsEAruWvL-Laa3MBA"
           },
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
-            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+            "signature": "in8RNUKM27CQxniTh5lKtRFsp0RGnbYjmm0UFA8mhyz0ITnlZ-r0_9i1qGAFWI2ib3FgdemnU1FqYkO20Rl_AQ"
           }
         ]
       },
