@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://www.input.so/agent-talk/v1/schemas/presence-token-claims.schema.json",
+    "$id": "https://input.so/agent-talk/v1/schemas/presence-token-claims.schema.json",
     "title": "Agent Talk presence token claims",
     "description": "The payload of the presence token: a compact JWS on a message, by which a service says the sender has an agent and what it accepts.",
     "$comment": "Protected header: { \"alg\": \"EdDSA\", \"kid\": <key id in the issuer's keys>, \"typ\": \"agent-talk-presence\" } (see $defs/protectedHeader). Checks only code can do: the signature against a current key of iss; sub equal to the message's From; iat at most 5 minutes ahead of the receiver's clock; exp at most 90 days after iat; now before exp. The reference implementation's own claim check is looser than this schema: it only checks that iss and sub are strings, acc and types string lists and v a number (then v must be 1).",

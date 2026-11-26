@@ -1,6 +1,6 @@
 # Agent Talk site
 
-Builds the static spec site served at `https://www.input.so/agent-talk`.
+Builds the static spec site served at `https://input.so/agent-talk`.
 
 ## Build
 
@@ -11,12 +11,12 @@ AGENT_TALK_SITE_NOINDEX=0 pnpm site:build    # launch build, indexable
 
 `site/build.ts` runs directly on Node 25 (type stripping). It reads `spec/`, renders the markdown with `marked`, applies `site/template.html` and `site/style.css`, and writes `site/dist/`. It prints warnings for relative links it cannot map, links to a missing schema or vector file, and links to a heading that does not exist.
 
-| Source                  | URL                                                 |
-| ----------------------- | --------------------------------------------------- |
-| `spec/agent-talk.md`    | `https://www.input.so/agent-talk/`                  |
-| `spec/a2a-extension.md` | `https://www.input.so/agent-talk/v1/` (A2A URI)     |
-| `spec/schemas/*.json`   | `https://www.input.so/agent-talk/v1/schemas/<file>` |
-| `spec/vectors/*.json`   | `https://www.input.so/agent-talk/v1/vectors/<file>` |
+| Source                  | URL                                             |
+| ----------------------- | ----------------------------------------------- |
+| `spec/agent-talk.md`    | `https://input.so/agent-talk/`                  |
+| `spec/a2a-extension.md` | `https://input.so/agent-talk/v1/` (A2A URI)     |
+| `spec/schemas/*.json`   | `https://input.so/agent-talk/v1/schemas/<file>` |
+| `spec/vectors/*.json`   | `https://input.so/agent-talk/v1/vectors/<file>` |
 
 Relative links between spec files are rewritten to these URLs (`a2a-extension.md#9-2` → `/agent-talk/v1/#9-2`, `schemas/step.schema.json` → `/agent-talk/v1/schemas/step.schema.json`).
 
@@ -43,42 +43,15 @@ Cache control: HTML and the sitemap `public, max-age=300, must-revalidate`; JSON
 
 ## Noindex switch
 
-The spec is private until launch, so every page carries `<meta name="robots" content="noindex, nofollow">` unless the build runs with `AGENT_TALK_SITE_NOINDEX=0`. `manifest.json` records which one was built (`"noindex": true`). For launch, rebuild with `AGENT_TALK_SITE_NOINDEX=0`, upload, invalidate, and check that `https://www.input.so/robots.txt` does not disallow `/agent-talk`.
+The spec is private until launch, so every page carries `<meta name="robots" content="noindex, nofollow">` unless the build runs with `AGENT_TALK_SITE_NOINDEX=0`. `manifest.json` records which one was built (`"noindex": true`). For launch, rebuild with `AGENT_TALK_SITE_NOINDEX=0`, upload, invalidate, and check that `https://input.so/robots.txt` does not disallow `/agent-talk`.
 
-## Hosting
+## Upload to S3
 
-`www.input.so` is Framer. The spec is served from its own small origin, and Framer's Multi Site rewrites put it under the marketing domain:
-
-```text
-www.input.so/agent-talk*  --(Framer rewrite)-->  https://agent-talk-origin.input.so/agent-talk*  -->  CloudFront --> S3
-```
-
-1. **Origin.** An S3 bucket (private, CloudFront origin access control) behind its own CloudFront distribution on `agent-talk-origin.input.so`. Every key lives under the `agent-talk/` prefix. Attach this viewer-request function so folder URLs serve their `index.html`; `/agent-talk/v1` must answer `200` with the page, not a redirect, because it is the A2A extension URI:
-
-    ```js
-    function handler(event) {
-        var request = event.request;
-        var uri = request.uri;
-        if (uri.endsWith("/")) {
-            request.uri = uri + "index.html";
-        } else if (uri.split("/").pop().indexOf(".") === -1) {
-            request.uri = uri + "/index.html";
-        }
-        return request;
-    }
-    ```
-
-2. **Framer.** Site Settings → Hosting → Multi Site: a rewrite from `/agent-talk` and `/agent-talk/*` to `https://agent-talk-origin.input.so/agent-talk` (external website). Check the plan allows external rewrites. Every page's canonical URL is on `www.input.so`, so the origin host is never what search engines keep.
-
-3. **Check** after the first deploy: `curl -sI https://www.input.so/agent-talk/v1` answers `200` with `text/html`, and `https://www.input.so/agent-talk/v1/schemas/step.schema.json` answers with `application/schema+json`. If Framer does not pass the origin's content types through, say so before launch: the schemas and vectors are fetched by tools.
-
-## Upload
-
-Upload each file with the metadata from the manifest, then remove keys the build no longer produces (old stylesheets, removed schemas):
+Every key lives under the `agent-talk/` prefix of the bucket. Upload each file with the metadata from the manifest, then remove keys the build no longer produces (old stylesheets, removed schemas):
 
 ```sh
-BUCKET=<agent talk spec bucket>
-DISTRIBUTION_ID=<agent-talk-origin distribution>
+BUCKET=<input.so web bucket>
+DISTRIBUTION_ID=<input.so web distribution>
 
 cd site/dist
 jq -r '.files[] | [.path, .contentType, .cacheControl] | @tsv' manifest.json |
@@ -95,4 +68,21 @@ comm -13 /tmp/agent-talk-local.txt /tmp/agent-talk-remote.txt |
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths '/agent-talk*'
 ```
 
-The pages load one same-origin stylesheet and an inline `application/ld+json` block, and run no scripts.
+## CloudFront
+
+On the input.so web distribution, add a behaviour with path pattern `/agent-talk*` whose origin is the bucket holding the `agent-talk/` prefix (no origin path: the request path already starts with `/agent-talk`). Attach a viewer-request CloudFront function that serves `index.html` for folder URLs, including `/agent-talk` and `/agent-talk/v1` without a trailing slash. `/agent-talk/v1` must answer `200` with the page, not a redirect, because it is the A2A extension URI; the canonical tag points search engines to the trailing-slash URL.
+
+```js
+function handler(event) {
+    var request = event.request;
+    var uri = request.uri;
+    if (uri.endsWith("/")) {
+        request.uri = uri + "index.html";
+    } else if (uri.split("/").pop().indexOf(".") === -1) {
+        request.uri = uri + "/index.html";
+    }
+    return request;
+}
+```
+
+Check two distribution-wide settings: custom error responses that rewrite 403/404 to the web app's `index.html` will also answer for missing `/agent-talk` URLs, and the response headers policy (CSP) applies too. The pages load one same-origin stylesheet and an inline `application/ld+json` block, and run no scripts.

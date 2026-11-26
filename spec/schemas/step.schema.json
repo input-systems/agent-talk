@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://www.input.so/agent-talk/v1/schemas/step.schema.json",
+    "$id": "https://input.so/agent-talk/v1/schemas/step.schema.json",
     "title": "Agent Talk signed step",
     "description": "One signed entry in a talk, as it travels between services and in an email's block: the step its author's service signed, with sig, and with seq once the host ordered it. A receiver accepts a step type it does not know when the name is valid, and shows it by its text.",
     "$comment": "Checks only code can do: the whole step at most 256000 characters as canonical JSON (RFC 8785) and nested at most 64 levels deep; every time a real instant; ask.expires after at and within 30 days of it; ask.autoUntil after at, within 24 hours of it and not after expires; a time value's end after its start; option ids unique within an ask; about at most 8000 characters as canonical JSON; sig verifying as a detached compact JWS (protected header { alg: EdDSA, kid }, no typ) over the step without seq and sig. An author (validateAgentTalkUnsignedStep) uses only the step types, value types and scopes this version defines, or private x- ones; this schema describes what a receiver accepts. Unknown properties are allowed: receivers ignore fields they do not know.",

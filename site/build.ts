@@ -10,11 +10,12 @@ const ROOT_DIR = join(SITE_DIR, "..");
 const SPEC_DIR = join(ROOT_DIR, "spec");
 const DIST_DIR = join(SITE_DIR, "dist");
 
-const ORIGIN = "https://www.input.so";
+const ORIGIN = "https://input.so";
 const BASE_PATH = "/agent-talk";
 const SITE_NAME = "Agent Talk";
 const GITHUB_URL = "https://github.com/input-systems/agent-talk";
 const INPUT_URL = "https://www.input.so";
+const WEBSITE_URL = "https://www.input.so/agent-talk";
 
 const CACHE_HTML = "public, max-age=300, must-revalidate";
 const CACHE_JSON = "public, max-age=3600";
@@ -98,6 +99,7 @@ const FILE_FOLDERS: FileFolder[] = [
 ];
 
 const NAV_ITEMS: NavItem[] = [
+    { label: "Website", href: WEBSITE_URL },
     { label: "Protocol", href: `${BASE_PATH}/` },
     { label: "A2A extension", href: `${BASE_PATH}/v1/` },
     { label: "Schemas", href: `${BASE_PATH}/v1/schemas/` },

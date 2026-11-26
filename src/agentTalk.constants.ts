@@ -210,7 +210,7 @@ export const DAY_MS = 24 * HOUR_MS;
 
 // the agent talk profile extension of a2a (protocol 9), where its specification lives. the uri is the version: a breaking
 // change takes a new one
-export const AGENT_TALK_A2A_EXTENSION_URI = "https://www.input.so/agent-talk/v1";
+export const AGENT_TALK_A2A_EXTENSION_URI = "https://input.so/agent-talk/v1";
 
 // the a2a protocol version this binding speaks, as the A2A-Version header and an interface's protocolVersion name it
 export const AGENT_TALK_A2A_VERSION = "1.0";

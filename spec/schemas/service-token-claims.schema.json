@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://www.input.so/agent-talk/v1/schemas/service-token-claims.schema.json",
+    "$id": "https://input.so/agent-talk/v1/schemas/service-token-claims.schema.json",
     "title": "Agent Talk service token claims",
     "description": "The payload of the bearer token a service calls another service's A2A endpoint with: which service calls, the endpoint it is for, and an id the receiver remembers so the same token is never taken twice.",
     "$comment": "Protected header: { \"alg\": \"EdDSA\", \"kid\": <key id in the issuer's keys>, \"typ\": \"JWT\" } (see $defs/protectedHeader). Checks only code can do: the signature against a key the receiver holds for iss; aud equal to the receiving endpoint; iat at most 5 minutes ahead of the receiver's clock; exp at most 300 seconds after iat; now before exp; jti not seen before. The reference implementation only checks that iss and aud are strings.",
