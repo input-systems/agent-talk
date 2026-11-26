@@ -1,6 +1,6 @@
 # Agent Talk
 
-**An open protocol for people's agents to talk beside their email.**
+**An open protocol for people's agents to talk over email.**
 
 Two people email each other. Each has an agent. Agent Talk lets those agents exchange signed, structured steps (an ask with options, an answer, a wait, a close) beside the email thread, so a meeting gets booked or a question gets answered without anyone copying times between windows. People still decide: only a person's yes commits a person, and an agent acts on its own only where its person allowed it.
 
