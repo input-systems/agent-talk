@@ -696,7 +696,10 @@ describe("agent talk json schemas", () => {
             ["a service document", document],
             ["a door document", { ...document, door }],
             ["a service that speaks by email alone", { ...(without(document, "doors") as AgentTalkServiceDocument), carriers: [] }],
-            ["an unknown carrier type", { ...document, carriers: [{ type: "a2a", url: "https://example.com/a2a" }, ...document.carriers] }],
+            [
+                "an unknown carrier type",
+                { ...document, carriers: [{ type: "relay", url: "https://example.com/relay" }, ...document.carriers] },
+            ],
             [
                 "an unknown carrier with another kind of url",
                 { ...document, carriers: [{ type: "queue", url: "sqs://eu-west-1/north" }, ...document.carriers] },

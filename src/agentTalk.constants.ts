@@ -214,7 +214,7 @@ export const AGENT_TALK_SERVICE_DOCUMENT_VERSION = 1;
 // where a service publishes its document, on its issuer's domain
 export const AGENT_TALK_SERVICE_WELL_KNOWN_PATH = "/.well-known/agent-talk-service.json";
 
-// the carriers a service document may list. readers ignore a type they do not know, so a new one (an a2a binding) is additive
+// the carriers a service document may list. readers ignore a type they do not know, so a new one is additive
 export const AGENT_TALK_CARRIER_TYPE = {
     HTTPS: "https",
 } as const;

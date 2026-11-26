@@ -152,8 +152,8 @@
         "keys": "https://north.example/.well-known/agent-talk-keys.json",
         "carriers": [
           {
-            "type": "a2a",
-            "url": "https://north.example/a2a"
+            "type": "relay",
+            "url": "https://north.example/relay"
           },
           {
             "type": "https",
@@ -170,7 +170,7 @@
           "kid": "north-2026-11",
           "typ": "agent-talk-service"
         },
-        "canonicalPayload": "{\"carriers\":[{\"type\":\"a2a\",\"url\":\"https://north.example/a2a\"},{\"type\":\"https\",\"url\":\"https://north.example/agent-talk/steps\"}],\"description\":\"North's agent talk service.\",\"doors\":\"https://north.example/agent-talk/doors/{address}\",\"issuer\":\"north.example\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\",\"logo\":\"https://north.example/logo.png\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"v\":1}",
+        "canonicalPayload": "{\"carriers\":[{\"type\":\"relay\",\"url\":\"https://north.example/relay\"},{\"type\":\"https\",\"url\":\"https://north.example/agent-talk/steps\"}],\"description\":\"North's agent talk service.\",\"doors\":\"https://north.example/agent-talk/doors/{address}\",\"issuer\":\"north.example\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\",\"logo\":\"https://north.example/logo.png\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"v\":1}",
         "signedDocument": {
           "v": 1,
           "issuer": "north.example",
@@ -183,8 +183,8 @@
           "keys": "https://north.example/.well-known/agent-talk-keys.json",
           "carriers": [
             {
-              "type": "a2a",
-              "url": "https://north.example/a2a"
+              "type": "relay",
+              "url": "https://north.example/relay"
             },
             {
               "type": "https",
@@ -196,7 +196,7 @@
           "signatures": [
             {
               "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
-              "signature": "F06z7gGbSjrQ7wl53kDJ_RNOHVUCGpjrmZaTSf86yTVcIcOkHwcHK3cnpnActrzxHv6HkCAH0FxfbYjha5njAA"
+              "signature": "GnOuE3NL6tH-khh171AK2Tq-hqqBkK2mb3-d1b1hZLnLwXyuuWbvcvkkKZXmX6at2ZpA_3VE9AnXiqZNA2vMCw"
             }
           ]
         }
@@ -358,8 +358,8 @@
         "keys": "https://north.example/.well-known/agent-talk-keys.json",
         "carriers": [
           {
-            "type": "a2a",
-            "url": "https://north.example/a2a"
+            "type": "relay",
+            "url": "https://north.example/relay"
           },
           {
             "type": "https",
@@ -371,7 +371,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
-            "signature": "F06z7gGbSjrQ7wl53kDJ_RNOHVUCGpjrmZaTSf86yTVcIcOkHwcHK3cnpnActrzxHv6HkCAH0FxfbYjha5njAA"
+            "signature": "GnOuE3NL6tH-khh171AK2Tq-hqqBkK2mb3-d1b1hZLnLwXyuuWbvcvkkKZXmX6at2ZpA_3VE9AnXiqZNA2vMCw"
           }
         ]
       },
@@ -902,8 +902,8 @@
         "keys": "https://north.example/.well-known/agent-talk-keys.json",
         "carriers": [
           {
-            "type": "a2a",
-            "url": "https://north.example/a2a"
+            "type": "relay",
+            "url": "https://north.example/relay"
           },
           {
             "type": "https",
@@ -915,7 +915,7 @@
         "signatures": [
           {
             "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
-            "signature": "F06z7gGbSjrQ7wl53kDJ_RNOHVUCGpjrmZaTSf86yTVcIcOkHwcHK3cnpnActrzxHv6HkCAH0FxfbYjha5njAA"
+            "signature": "GnOuE3NL6tH-khh171AK2Tq-hqqBkK2mb3-d1b1hZLnLwXyuuWbvcvkkKZXmX6at2ZpA_3VE9AnXiqZNA2vMCw"
           }
         ]
       },
@@ -931,8 +931,8 @@
         "keys": "https://north.example/.well-known/agent-talk-keys.json",
         "carriers": [
           {
-            "type": "a2a",
-            "url": "https://north.example/a2a"
+            "type": "relay",
+            "url": "https://north.example/relay"
           },
           {
             "type": "https",

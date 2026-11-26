@@ -635,7 +635,7 @@ A sender reads a response as one of three outcomes:
 
 ### 9.7 Relation to A2A (informative)
 
-Agent Talk borrows three ideas from A2A (https://a2a-protocol.org): a signed discovery document at a well-known URL, skills listed on an open door (`handles`), and a URI that is the version (the schemas and test vectors of this version live under `https://talk.input.so/v1/`). An A2A binding may be defined later as another carrier type in the service document. Readers that do not know it ignore it, so services can add it beside `https` without anyone switching. It is not part of this draft.
+Agent Talk borrows three ideas from A2A (https://a2a-protocol.org): a signed discovery document at a well-known URL, skills listed on an open door (`handles`), and a URI that is the version (the schemas and test vectors of this version live under `https://talk.input.so/v1/`).
 
 ## 10. Web link binding
 

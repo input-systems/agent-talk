@@ -1427,7 +1427,7 @@ const northDoorDocument: AgentTalkServiceDocument = {
 // a carrier type and a field this version does not define: both are signed, and a reader keeps the carrier and drops the field
 const northFutureDocument = {
     ...northDocument,
-    carriers: [{ type: "a2a", url: "https://north.example/a2a" }, ...northDocument.carriers],
+    carriers: [{ type: "relay", url: "https://north.example/relay" }, ...northDocument.carriers],
     logo: "https://north.example/logo.png",
 } as AgentTalkServiceDocument;
 

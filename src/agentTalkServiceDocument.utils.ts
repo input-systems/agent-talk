@@ -4,7 +4,7 @@ import { getIsJsonObject } from "./agentTalkJson.utils.js";
 import { decodeJws, encodeJwsSegment, signJws, verifyJws } from "./agentTalkJws.utils.js";
 
 // one way a step can reach a service directly: its type and where. a reader ignores a type it does not know, so a service may
-// list more carriers later (an a2a endpoint, a queue) without anyone having to switch
+// list more carriers later (a queue, a relay) without anyone having to switch
 export type AgentTalkCarrier = { type: string; url: string };
 
 // one kind of request an open door handles

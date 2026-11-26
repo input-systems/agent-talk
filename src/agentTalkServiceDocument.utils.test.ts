@@ -44,10 +44,14 @@ describe("agent talk service document", () => {
     it("ignores carriers it does not know and fields it does not define, and refuses a malformed document", async () => {
         const { north } = await createNorth();
         const document = await north.getDoorDocument("door_1");
-        const withA2a = { ...document, carriers: [{ type: "a2a", url: "https://north.test/a2a" }, ...document.carriers], extra: true };
+        const withRelay = {
+            ...document,
+            carriers: [{ type: "relay", url: "https://north.test/relay" }, ...document.carriers],
+            extra: true,
+        };
 
-        expect(readAgentTalkServiceDocument(withA2a)).toMatchObject({ carriers: withA2a.carriers, door: { id: "door_1" } });
-        expect(readAgentTalkServiceDocument(withA2a)).not.toHaveProperty("extra");
+        expect(readAgentTalkServiceDocument(withRelay)).toMatchObject({ carriers: withRelay.carriers, door: { id: "door_1" } });
+        expect(readAgentTalkServiceDocument(withRelay)).not.toHaveProperty("extra");
         const withQueue = { ...document, carriers: [{ type: "queue", url: "sqs://eu-west-1/north" }, { type: "x" }, ...document.carriers] };
         expect(readAgentTalkServiceDocument(withQueue)?.carriers).toEqual([
             { type: "queue", url: "sqs://eu-west-1/north" },
