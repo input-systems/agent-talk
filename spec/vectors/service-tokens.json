@@ -1,12 +1,12 @@
 {
-  "description": "A2A service tokens (protocol 9.3). Check token for audience at now. Order: malformed (typ not JWT, claims of the wrong shape, jti not 1 to 128 characters), unknownKey, badSignature, wrongAudience, postDated, tooLong (exp - iat over 300 s), expired. A valid result also names the kid; the caller still checks jti was not seen before.",
+  "description": "Service tokens (protocol 9.4). Check token for audience at now. Order: malformed (typ not JWT, claims of the wrong shape, jti not 1 to 128 characters), unknownKey, badSignature, wrongAudience, postDated, tooLong (exp - iat over 300 s), expired. A valid result also names the kid; the caller still checks jti was not seen before.",
   "version": 1,
   "cases": [
     {
       "name": "valid",
-      "description": "north.example calls south.example's A2A endpoint.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.hj-CluI5PiwdAd8OkYP56Kair86RbVlJaU6W6b6-M5kXRUKgfDs4PyyeWaPsFlJAJvp6xt6eHgspJ0eWBNBaAw",
-      "audience": "https://south.example/a2a",
+      "description": "north.example calls south.example's direct url.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.-5r26g4ISQs74jiw4CHOgDB843cXoN-OdvHqKVoMYlAjLP8SzRCGmAS0q658zu8DwWvT0PDZedfpCjhdUFU5Dg",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -22,7 +22,7 @@
       "expected": {
         "isValid": true,
         "claims": {
-          "aud": "https://south.example/a2a",
+          "aud": "https://south.example/agent-talk/steps",
           "exp": 1795255500,
           "iat": 1795255200,
           "iss": "north.example",
@@ -33,8 +33,8 @@
     },
     {
       "name": "wrong audience",
-      "description": "A token for another endpoint.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.hj-CluI5PiwdAd8OkYP56Kair86RbVlJaU6W6b6-M5kXRUKgfDs4PyyeWaPsFlJAJvp6xt6eHgspJ0eWBNBaAw",
+      "description": "A token for another url.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.-5r26g4ISQs74jiw4CHOgDB843cXoN-OdvHqKVoMYlAjLP8SzRCGmAS0q658zu8DwWvT0PDZedfpCjhdUFU5Dg",
       "audience": "https://south.example/other",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
@@ -56,8 +56,8 @@
     {
       "name": "valid one second before exp",
       "description": "Checked at exp - 1.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.hj-CluI5PiwdAd8OkYP56Kair86RbVlJaU6W6b6-M5kXRUKgfDs4PyyeWaPsFlJAJvp6xt6eHgspJ0eWBNBaAw",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.-5r26g4ISQs74jiw4CHOgDB843cXoN-OdvHqKVoMYlAjLP8SzRCGmAS0q658zu8DwWvT0PDZedfpCjhdUFU5Dg",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:04:59.000Z",
       "receiverKeys": [
         {
@@ -73,7 +73,7 @@
       "expected": {
         "isValid": true,
         "claims": {
-          "aud": "https://south.example/a2a",
+          "aud": "https://south.example/agent-talk/steps",
           "exp": 1795255500,
           "iat": 1795255200,
           "iss": "north.example",
@@ -85,8 +85,8 @@
     {
       "name": "expired at exp",
       "description": "Checked at exactly exp.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.hj-CluI5PiwdAd8OkYP56Kair86RbVlJaU6W6b6-M5kXRUKgfDs4PyyeWaPsFlJAJvp6xt6eHgspJ0eWBNBaAw",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.-5r26g4ISQs74jiw4CHOgDB843cXoN-OdvHqKVoMYlAjLP8SzRCGmAS0q658zu8DwWvT0PDZedfpCjhdUFU5Dg",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:05:00.000Z",
       "receiverKeys": [
         {
@@ -107,8 +107,8 @@
     {
       "name": "at the clock skew limit",
       "description": "iat 5 minutes ahead of the receiver's clock.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1ODAwLCJpYXQiOjE3OTUyNTU1MDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.xwgVyaoz_pChS4DhjZFhKKURUdLZHkNY5AudU2EI6ltGd4N6giCgH0JuQp9xr7t1DP6MNwEzWe7lO0MzvagZDA",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTgwMCwiaWF0IjoxNzk1MjU1NTAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.2bQSWqAza_rqTkQk9tGxnyCyi-4TWilnqZW6vPFXw2jww8QrOrYSBcV6vZ4FtOHDu7IcK9hos3cqoKhPhonDCw",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -124,7 +124,7 @@
       "expected": {
         "isValid": true,
         "claims": {
-          "aud": "https://south.example/a2a",
+          "aud": "https://south.example/agent-talk/steps",
           "exp": 1795255800,
           "iat": 1795255500,
           "iss": "north.example",
@@ -136,8 +136,8 @@
     {
       "name": "post-dated",
       "description": "iat 5 minutes and 1 second ahead of the receiver's clock.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1ODAxLCJpYXQiOjE3OTUyNTU1MDEsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.Zelaoor1I9AQdtiDuckzxIDJEuoRnj6LYZRYaJH_vcklXudIiyO0erXzhPcL2nR1MUl24XClw_y2DySX2mZoBQ",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTgwMSwiaWF0IjoxNzk1MjU1NTAxLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.stgbI9OZ0zkAlRXtE67MY42UWpwPMrVj_DeIca5-J50HOPWmeTT0n7Ldwzhh_TceOYrjVXIVBrfPOKdb3n4kDA",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -158,8 +158,8 @@
     {
       "name": "too long",
       "description": "exp - iat = 5 minutes and 1 second.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAxLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.yWmpKYgueuFQwLqxHcLl0p5oaLP2mOttkSEmG5nUoI_jp1j_zbb31qIiP-oo5SEekKBQoZ7h8DKcIkuftSltCQ",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMSwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.sPPm7G4fyFPw5f6jTbY7_KyTlUyL0h70XaHREZpBHtEsQGOIjMLy5K3pJg1Mi_ecEQSK-myHKGnFRgGEKU7RCA",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -180,8 +180,8 @@
     {
       "name": "tampered audience",
       "description": "aud changed after signing.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhLyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.hj-CluI5PiwdAd8OkYP56Kair86RbVlJaU6W6b6-M5kXRUKgfDs4PyyeWaPsFlJAJvp6xt6eHgspJ0eWBNBaAw",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcy8iLCJleHAiOjE3OTUyNTU1MDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsImp0aSI6IjBiNmYyYzFlLTZhNTEtNGQzZS05YTQzLTNmMWI3YzJhOWQxMCJ9.-5r26g4ISQs74jiw4CHOgDB843cXoN-OdvHqKVoMYlAjLP8SzRCGmAS0q658zu8DwWvT0PDZedfpCjhdUFU5Dg",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -201,8 +201,8 @@
     {
       "name": "wrong key",
       "description": "Signed with south.example's private key under north.example's kid.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.EfX6fg4zOvxd6JuTfBkoLlCu3Xuqj5aTX0KvS6IQqZ9SjWUwvzVs0WeYS_X9xTAHhHSKD0S-9pz1FKl39t8IBg",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.9cmv_tO9oiOvoDjjLpvuF-WsA56brljJvCb76dx8c42vYg7lOo0k9SI4QEeiX8JSw3XfpqAfDZ51o5YyCnqfCw",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -223,8 +223,8 @@
     {
       "name": "unknown issuer",
       "description": "rogue.example calls: the receiver does not hold its key.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6InJvZ3VlLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6InJvZ3VlLmV4YW1wbGUiLCJqdGkiOiIwYjZmMmMxZS02YTUxLTRkM2UtOWE0My0zZjFiN2MyYTlkMTAifQ.i2BvkAsGlWULCIZMFO2wkD1Kgf1eDTamrh63k4u1Yi63O9SRhuYffxHHkblJAtV7PDK7Znrf5d1rzC9RenHyBw",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6InJvZ3VlLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJyb2d1ZS5leGFtcGxlIiwianRpIjoiMGI2ZjJjMWUtNmE1MS00ZDNlLTlhNDMtM2YxYjdjMmE5ZDEwIn0.WmSMkwurHoGK3wHcPljor22PgHkpUBqHjjj1gRJODpMpMaBy5yJN3knKLq7g7Hi3jjN_Ash_gFefieGdamG2Bw",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -246,7 +246,7 @@
       "name": "presence token as service token",
       "description": "Its typ is not JWT.",
       "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
-      "audience": "https://south.example/a2a",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -267,8 +267,8 @@
     {
       "name": "empty jti",
       "description": "jti must be 1 to 128 characters.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiIifQ.3TP3pS3NlTRxh9bakXLJAkCv5e_zo7VFbw6i3EiUs2SM__1CMdfhqONaAzQplD9-7vFzBwC3YYwggRKrzbltBg",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiIn0.ficWD9S_lxFhiDqMySwqZ9Wnx-7OYtoAtkubIt2EGXaw7hhYgC8ykiFoOdWBEwNMvOB3TSJ1EJq4RENFBwHkCg",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -289,8 +289,8 @@
     {
       "name": "jti too long",
       "description": "A jti of 129 characters.",
-      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYTJhIiwiZXhwIjoxNzk1MjU1NTAwLCJpYXQiOjE3OTUyNTUyMDAsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJqdGkiOiJqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqamoifQ.8ROceZlAqXXK7Ofx6sqS0oGVdD4ilmw2fhwaq9oUPsk8vZNep38J8m5NMXfCzdV_Nr5a7QOZV3PWm1CDOBfvAg",
-      "audience": "https://south.example/a2a",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL3NvdXRoLmV4YW1wbGUvYWdlbnQtdGFsay9zdGVwcyIsImV4cCI6MTc5NTI1NTUwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwianRpIjoiampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqampqIn0.6qiu_8ajjir-WmkJAC4x2goTrtYVLStiVc3hMnPovm4F_EkcPnMbKAClUwFoY46hOx4Wo5ar7yDESmiUqvw7Bg",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {
@@ -312,7 +312,7 @@
       "name": "missing aud",
       "description": "No aud claim.",
       "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3OTUyNTU1MDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsImp0aSI6IjBiNmYyYzFlLTZhNTEtNGQzZS05YTQzLTNmMWI3YzJhOWQxMCJ9.7cRdmQU5MLjHNMZbpLqlUw180B1-kPgxBjZP82ejotCgWr2FaCNXzv3zuZJJ-nt7AHwqC-Mr7J-ldB3abIKjAw",
-      "audience": "https://south.example/a2a",
+      "audience": "https://south.example/agent-talk/steps",
       "now": "2026-11-21T10:00:00.000Z",
       "receiverKeys": [
         {

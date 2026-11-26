@@ -1,6 +1,5 @@
 export {
-    AGENT_TALK_A2A_EXTENSION_URI,
-    AGENT_TALK_A2A_VERSION,
+    AGENT_TALK_CARRIER_TYPE,
     AGENT_TALK_HEADER,
     AGENT_TALK_LINK_HEADER,
     AGENT_TALK_LIMIT,
@@ -18,6 +17,8 @@ export {
     AGENT_TALK_INTRODUCTION_REQUEST_TYPE,
     AGENT_TALK_REQUESTABLE_SCOPES,
     AGENT_TALK_SCOPE,
+    AGENT_TALK_SERVICE_DOCUMENT_VERSION,
+    AGENT_TALK_SERVICE_WELL_KNOWN_PATH,
     AGENT_TALK_SIGNING_ALGORITHM,
     AGENT_TALK_STEP_ACTOR,
     AGENT_TALK_STEP_BLOCK_REJECT_REASON,
@@ -74,39 +75,18 @@ export type {
 } from "./agentTalk.types.js";
 export { getAgentTalkAttention } from "./agentTalkAttention.utils.js";
 export {
-    A2A_ERROR_CODE,
-    A2A_HEADER,
-    A2A_METHOD,
-    A2A_PROTOCOL_BINDING,
-    A2A_ROLE,
-    A2A_TASK_STATE,
-    AGENT_TALK_A2A_BODY_MAX_BYTES,
-    AGENT_TALK_A2A_REFUSAL,
-    createA2aJsonRpcError,
-    createA2aJsonRpcRequest,
-    createAgentTalkA2aMessage,
-    createAgentTalkServiceCard,
-    getAgentTalkA2aHeaderError,
-    getAgentTalkA2aRequestHeaders,
-    getAgentTalkA2aSendResult,
-    createA2aGetTaskRequest,
-    getAgentTalkA2aTask,
-    getAgentTalkA2aTaskState,
-    readAgentTalkA2aMessage,
-} from "./agentTalkA2a.utils.js";
-export type {
-    A2aArtifact,
-    A2aSkill,
-    A2aJsonRpcError,
-    A2aJsonRpcResponse,
-    A2aMessage,
-    A2aPart,
-    A2aSendMessageResult,
-    A2aTask,
-    A2aTaskState,
-} from "./agentTalkA2a.utils.js";
-export { signAgentTalkAgentCard, verifyAgentTalkAgentCard } from "./agentTalkAgentCard.utils.js";
-export type { AgentTalkAgentCardSignature } from "./agentTalkAgentCard.utils.js";
+    AGENT_TALK_DIRECT_BODY_MAX_BYTES,
+    AGENT_TALK_DIRECT_ERROR,
+    AGENT_TALK_DIRECT_OUTCOME,
+    AGENT_TALK_DIRECT_REFUSAL,
+    AGENT_TALK_DIRECT_STATUS,
+    AGENT_TALK_DIRECT_TAKEN,
+    createAgentTalkDirectBody,
+    getAgentTalkDirectOutcome,
+    getAgentTalkDirectRequestHeaders,
+    readAgentTalkDirectBody,
+} from "./agentTalkDirect.utils.js";
+export type { AgentTalkDirectOutcome, AgentTalkDirectResponse } from "./agentTalkDirect.utils.js";
 export { formatAgentTalkStepBlock, readAgentTalkStepBlock } from "./agentTalkBlock.utils.js";
 export {
     AGENT_TALK_DELEGATION_RECORD_PREFIX,
@@ -135,16 +115,31 @@ export {
     importAgentTalkPublicKeyJwk,
     importAgentTalkSigningKeyJwk,
 } from "./agentTalkJws.utils.js";
-export { getIsJsonObject } from "./agentTalkJson.utils.js";
+export { getCanonicalJson, getIsJsonObject } from "./agentTalkJson.utils.js";
 export { getAgentTalkAskMarkdown } from "./agentTalkMarkdown.utils.js";
 export { createAgentTalkReferenceParticipant } from "./agentTalkReferenceParticipant.js";
 export type {
-    AgentTalkReferenceA2aRequest,
+    AgentTalkReferenceDirectRequest,
     AgentTalkReferenceEmail,
     AgentTalkReferenceKey,
     AgentTalkReferenceReceived,
 } from "./agentTalkReferenceParticipant.js";
 export { getIsAgentTalkScope } from "./agentTalkScope.utils.js";
+export {
+    getAgentTalkDirectUrl,
+    getAgentTalkDoorDocumentUrl,
+    readAgentTalkServiceDocument,
+    signAgentTalkServiceDocument,
+    verifyAgentTalkServiceDocument,
+} from "./agentTalkServiceDocument.utils.js";
+export type {
+    AgentTalkCarrier,
+    AgentTalkDoor,
+    AgentTalkDoorHandle,
+    AgentTalkServiceDocument,
+    AgentTalkServiceDocumentSignature,
+    AgentTalkSignedServiceDocument,
+} from "./agentTalkServiceDocument.utils.js";
 export {
     AGENT_TALK_SERVICE_TOKEN_LIFETIME_SECONDS,
     AGENT_TALK_SERVICE_TOKEN_REJECT_REASON,

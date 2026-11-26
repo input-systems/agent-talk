@@ -12,8 +12,10 @@ Every schema's `$id` is `https://talk.input.so/v1/schemas/<file>`, and they refe
 | `step-block.schema.json`            | The `{ v, token, step }` JSON inside an email's `<script type="application/agent-talk+json">`                                                                                                                                                                                 |
 | `presence-token-claims.schema.json` | The presence token payload; `#/$defs/protectedHeader` is its header (`alg: EdDSA`, `kid`, `typ: agent-talk-presence`)                                                                                                                                                         |
 | `talk-token-claims.schema.json`     | The talk token payload; header `typ: agent-talk-talk`                                                                                                                                                                                                                         |
-| `service-token-claims.schema.json`  | The A2A service token payload; header `typ: JWT`                                                                                                                                                                                                                              |
+| `service-token-claims.schema.json`  | The service token payload; header `typ: JWT`                                                                                                                                                                                                                                  |
 | `delegation-file.schema.json`       | `/.well-known/agent-talk.json`                                                                                                                                                                                                                                                |
+| `service-document.schema.json`      | `/.well-known/agent-talk-service.json`: a signed service document, and an open door's document with `door`                                                                                                                                                                    |
+| `direct-body.schema.json`           | The body of one POST to a service's `https` carrier: `{ v, step, door? }`, the step without `seq`                                                                                                                                                                             |
 
 The step schema describes what a **receiver** accepts: any valid type name and any scope name, shown by `text` or treated as never granted. An author uses only the types and scopes this version defines, or private `x-` ones (`common.schema.json#/$defs/authorScope`). Unknown properties are allowed everywhere, because receivers ignore fields they do not know.
 
@@ -27,7 +29,9 @@ Times use `format: "date-time"` next to the code's pattern. Use a validator that
 - A time value's `end` after its `start`.
 - Option ids unique within an ask.
 - `sig` verifies: a detached compact JWS (header `{ alg: EdDSA, kid }`, no `typ`) over the step without `seq` and `sig`.
-- Tokens: the signature against a key of `iss`; `sub` equal to the message's From; `iat` at most 5 minutes ahead of the receiver's clock; `exp` at most 90 days (presence), 30 days (talk) or 300 seconds (service) after `iat`; now before `exp`; a service token's `aud` equal to the endpoint and its `jti` not seen before.
+- Tokens: the signature against a key of `iss`; `sub` equal to the message's From; `iat` at most 5 minutes ahead of the receiver's clock; `exp` at most 90 days (presence), 30 days (talk) or 300 seconds (service) after `iat`; now before `exp`; a service token's `aud` equal to the carrier url and its `jti` not seen before.
+- A service document: `issuer` equal to the domain it was fetched for, and a signature (`typ: agent-talk-service`, over the document in JCS without `signatures`) by a key the reader already holds for that issuer.
+- A direct body: at most 64 KiB, with a service token in the `Authorization` header.
 - A block: at most 32,000 characters of JSON with `<`, `>` and `&` escaped; its token is this message's talk token; the step's `talk`, `id` and `by.address` match the token; `email`, when set, equals the message's Message-ID.
 
 ## Where the schemas and the code differ
@@ -36,4 +40,6 @@ Times use `format: "date-time"` next to the code's pattern. Use a validator that
 - Addresses: the code requires an address to equal its own lowercase form; the schema rules out only `A-Z`, so `Émile@example.com` passes the schema.
 - Times: both sides refuse a day that does not exist and a field out of range. The code also refuses a leap second (`23:59:60`), which `date-time` allows. A `date` value must be a real day on both sides.
 - Token claims: the code checks only the types of the claims; the schemas also hold `iss`, `sub`, `talk` and `step` to their grammars.
+- Service document: the code holds `issuer` to at most 128 characters and `door.address` to at most 500; the schema wants an issuer domain and an address.
+- Direct body: the code's body reader checks only that `step` is an object, and leaves the step to admission, which answers a bad step or one with `seq` with the uniform refusal; the schema checks the step and wants it without `seq`.
 - Delegation file: the code trims and lowercases `svc` and local parts; the schema wants them canonical.

@@ -1,0 +1,1201 @@
+{
+  "description": "Signed service documents (protocol 9.1). sign: sign document with signer's key and compare the signed document; the signature is a JWS with typ agent-talk-service over the document in JCS with signatures left out, protected is the base64url protected header, and the payload is not carried. verify: whether the document names issuer and any of its first eight signatures checks out against a key the receiver holds for issuer. read: the document as a reader takes it (signatures and fields this version does not define left out, unknown carrier types kept), or null.",
+  "version": 1,
+  "cases": [
+    {
+      "kind": "sign",
+      "name": "sign service document",
+      "description": "north.example's service document.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "signer": "north.example",
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11",
+          "typ": "agent-talk-service"
+        },
+        "canonicalPayload": "{\"carriers\":[{\"type\":\"https\",\"url\":\"https://north.example/agent-talk/steps\"}],\"description\":\"North's agent talk service.\",\"doors\":\"https://north.example/agent-talk/doors/{address}\",\"issuer\":\"north.example\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"v\":1}",
+        "signedDocument": {
+          "v": 1,
+          "issuer": "north.example",
+          "name": "North",
+          "description": "North's agent talk service.",
+          "provider": {
+            "organization": "North Example",
+            "url": "https://north.example"
+          },
+          "keys": "https://north.example/.well-known/agent-talk-keys.json",
+          "carriers": [
+            {
+              "type": "https",
+              "url": "https://north.example/agent-talk/steps"
+            }
+          ],
+          "doors": "https://north.example/agent-talk/doors/{address}",
+          "signatures": [
+            {
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+              "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign door document",
+      "description": "The door document of support@north.example: the service document with door.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "door": {
+          "id": "door_5Lr8",
+          "address": "support@north.example",
+          "handles": [
+            {
+              "id": "order-status",
+              "name": "Order status",
+              "description": "Where an order is and when it arrives"
+            }
+          ]
+        }
+      },
+      "signer": "north.example",
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11",
+          "typ": "agent-talk-service"
+        },
+        "canonicalPayload": "{\"carriers\":[{\"type\":\"https\",\"url\":\"https://north.example/agent-talk/steps\"}],\"description\":\"North's agent talk service.\",\"door\":{\"address\":\"support@north.example\",\"handles\":[{\"description\":\"Where an order is and when it arrives\",\"id\":\"order-status\",\"name\":\"Order status\"}],\"id\":\"door_5Lr8\"},\"doors\":\"https://north.example/agent-talk/doors/{address}\",\"issuer\":\"north.example\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"v\":1}",
+        "signedDocument": {
+          "v": 1,
+          "issuer": "north.example",
+          "name": "North",
+          "description": "North's agent talk service.",
+          "provider": {
+            "organization": "North Example",
+            "url": "https://north.example"
+          },
+          "keys": "https://north.example/.well-known/agent-talk-keys.json",
+          "carriers": [
+            {
+              "type": "https",
+              "url": "https://north.example/agent-talk/steps"
+            }
+          ],
+          "doors": "https://north.example/agent-talk/doors/{address}",
+          "door": {
+            "id": "door_5Lr8",
+            "address": "support@north.example",
+            "handles": [
+              {
+                "id": "order-status",
+                "name": "Order status",
+                "description": "Where an order is and when it arrives"
+              }
+            ]
+          },
+          "signatures": [
+            {
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+              "signature": "cgUGKjcW9Vsio2naqbmUAIfK9R_l1U7F7ZWmBzKinK-MTmQQkSPdbHwCvv5f2GnoxRq2TL-GYydqp8la7azbAQ"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign with an unknown carrier",
+      "description": "A carrier type and a field this version does not define are signed like any other.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "a2a",
+            "url": "https://north.example/a2a"
+          },
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "logo": "https://north.example/logo.png"
+      },
+      "signer": "north.example",
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11",
+          "typ": "agent-talk-service"
+        },
+        "canonicalPayload": "{\"carriers\":[{\"type\":\"a2a\",\"url\":\"https://north.example/a2a\"},{\"type\":\"https\",\"url\":\"https://north.example/agent-talk/steps\"}],\"description\":\"North's agent talk service.\",\"doors\":\"https://north.example/agent-talk/doors/{address}\",\"issuer\":\"north.example\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\",\"logo\":\"https://north.example/logo.png\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"v\":1}",
+        "signedDocument": {
+          "v": 1,
+          "issuer": "north.example",
+          "name": "North",
+          "description": "North's agent talk service.",
+          "provider": {
+            "organization": "North Example",
+            "url": "https://north.example"
+          },
+          "keys": "https://north.example/.well-known/agent-talk-keys.json",
+          "carriers": [
+            {
+              "type": "a2a",
+              "url": "https://north.example/a2a"
+            },
+            {
+              "type": "https",
+              "url": "https://north.example/agent-talk/steps"
+            }
+          ],
+          "doors": "https://north.example/agent-talk/doors/{address}",
+          "logo": "https://north.example/logo.png",
+          "signatures": [
+            {
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+              "signature": "F06z7gGbSjrQ7wl53kDJ_RNOHVUCGpjrmZaTSf86yTVcIcOkHwcHK3cnpnActrzxHv6HkCAH0FxfbYjha5njAA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "valid",
+      "description": "north.example's signed service document.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "valid with keys in another order",
+      "description": "The payload is the document in JCS without signatures.",
+      "document": {
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "description": "North's agent talk service.",
+        "name": "North",
+        "issuer": "north.example",
+        "v": 1
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "valid door document",
+      "description": "A door document verifies like the service document.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "door": {
+          "id": "door_5Lr8",
+          "address": "support@north.example",
+          "handles": [
+            {
+              "id": "order-status",
+              "name": "Order status",
+              "description": "Where an order is and when it arrives"
+            }
+          ]
+        },
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "cgUGKjcW9Vsio2naqbmUAIfK9R_l1U7F7ZWmBzKinK-MTmQQkSPdbHwCvv5f2GnoxRq2TL-GYydqp8la7azbAQ"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "valid with an unknown carrier",
+      "description": "A document with a carrier type the reader does not know still verifies.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "a2a",
+            "url": "https://north.example/a2a"
+          },
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "logo": "https://north.example/logo.png",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "F06z7gGbSjrQ7wl53kDJ_RNOHVUCGpjrmZaTSf86yTVcIcOkHwcHK3cnpnActrzxHv6HkCAH0FxfbYjha5njAA"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "tampered name",
+      "description": "name changed after signing.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "Not North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "tampered carrier",
+      "description": "The https carrier's url changed after signing.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://rogue.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "wrong issuer",
+      "description": "north.example's document checked as south.example's: a document verifies only for the issuer it names.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "issuer": "south.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "issuer rewritten",
+      "description": "issuer changed to south.example after signing, checked as south.example's.",
+      "document": {
+        "v": 1,
+        "issuer": "south.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "issuer": "south.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "no signatures",
+      "description": "The unsigned document.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "empty signatures",
+      "description": "signatures: [].",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": []
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "wrong key",
+      "description": "Signed with rogue.example's private key under north.example's kid.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "WaEdymt4idAcd3FiCElJA40HdqyeEWtyGcmX8_Ou4irGiEu--tMvvHhAeitJD_tqHeZYA2hc3ERDbgtKBjxaDg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "a valid signature after a bad one",
+      "description": "Any one signature by a key the reader holds for the issuer is enough.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "WaEdymt4idAcd3FiCElJA40HdqyeEWtyGcmX8_Ou4irGiEu--tMvvHhAeitJD_tqHeZYA2hc3ERDbgtKBjxaDg"
+          },
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "another typ",
+      "description": "A genuine signature over the same payload whose protected header has typ JOSE.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "Cuz-6KuPgpDtkOzV-vc2Vb7NpWdJi8B5NnkUsbhMi4RcU7BSco0K-0rkQf0E_9cAJc9QnYg9xutFHn9rT5m9Bg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "read",
+      "name": "read service document",
+      "description": "The document without its signatures.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "PNLoVSoW3Cd3jxkYJlsbqVKXdkH7aIdLWYIwcgucwADDPaaIGMYzQ8EQVcasjo4ffIlBvVLiYwScYZb7DqNWAg"
+          }
+        ]
+      },
+      "expected": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "read door document",
+      "description": "The door document, door included.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "door": {
+          "id": "door_5Lr8",
+          "address": "support@north.example",
+          "handles": [
+            {
+              "id": "order-status",
+              "name": "Order status",
+              "description": "Where an order is and when it arrives"
+            }
+          ]
+        },
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "cgUGKjcW9Vsio2naqbmUAIfK9R_l1U7F7ZWmBzKinK-MTmQQkSPdbHwCvv5f2GnoxRq2TL-GYydqp8la7azbAQ"
+          }
+        ]
+      },
+      "expected": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "door": {
+          "id": "door_5Lr8",
+          "address": "support@north.example",
+          "handles": [
+            {
+              "id": "order-status",
+              "name": "Order status",
+              "description": "Where an order is and when it arrives"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "unknown carrier kept",
+      "description": "A carrier type the reader does not know is kept; a field this version does not define is left out.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "a2a",
+            "url": "https://north.example/a2a"
+          },
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "logo": "https://north.example/logo.png",
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ",
+            "signature": "F06z7gGbSjrQ7wl53kDJ_RNOHVUCGpjrmZaTSf86yTVcIcOkHwcHK3cnpnActrzxHv6HkCAH0FxfbYjha5njAA"
+          }
+        ]
+      },
+      "expected": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "a2a",
+            "url": "https://north.example/a2a"
+          },
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "email alone",
+      "description": "No carriers: the service speaks by email alone.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "another version",
+      "description": "v: 2.",
+      "document": {
+        "v": 2,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "no carriers list",
+      "description": "carriers is missing.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "nine carriers",
+      "description": "At most 8 carriers.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "x-0",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-1",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-2",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-3",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-4",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-5",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-6",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-7",
+            "url": "https://north.example/x"
+          },
+          {
+            "type": "x-8",
+            "url": "https://north.example/x"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "carrier over http",
+      "description": "Every url is https.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "http://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "keys over http",
+      "description": "Every url is https.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "http://north.example/keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "doors without the address variable",
+      "description": "The doors template names {address}.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "handle without a description",
+      "description": "Each handle has an id, a name and a description.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}",
+        "door": {
+          "id": "door_5Lr8",
+          "address": "support@north.example",
+          "handles": [
+            {
+              "id": "order-status",
+              "name": "Order status"
+            }
+          ]
+        }
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
+      "name": "no provider",
+      "description": "provider is missing.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    }
+  ]
+}

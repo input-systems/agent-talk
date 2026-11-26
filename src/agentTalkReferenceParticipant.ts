@@ -1,30 +1,27 @@
 import {
     AGENT_TALK_ANSWER_RESULT,
     AGENT_TALK_ASK_ANSWER_BY,
+    AGENT_TALK_CARRIER_TYPE,
     AGENT_TALK_HEADER,
+    AGENT_TALK_SERVICE_DOCUMENT_VERSION,
+    AGENT_TALK_SERVICE_WELL_KNOWN_PATH,
     AGENT_TALK_STEP_ACTOR,
     AGENT_TALK_STEP_TYPE,
     AGENT_TALK_STEP_VIA,
 } from "./agentTalk.constants.js";
 import type { AgentTalkPublicKeyResolver, AgentTalkSignedStep, AgentTalkSigningKey } from "./agentTalk.types.js";
-import {
-    AGENT_TALK_A2A_REFUSAL,
-    A2A_HEADER,
-    AGENT_TALK_A2A_BODY_MAX_BYTES,
-    createA2aJsonRpcError,
-    createA2aGetTaskRequest,
-    createA2aJsonRpcRequest,
-    createAgentTalkA2aMessage,
-    createAgentTalkServiceCard,
-    getAgentTalkA2aHeaderError,
-    getAgentTalkA2aRequestHeaders,
-    getAgentTalkA2aSendResult,
-    readAgentTalkA2aMessage,
-    type A2aJsonRpcResponse,
-} from "./agentTalkA2a.utils.js";
 import { formatAgentTalkStepBlock, readAgentTalkStepBlock } from "./agentTalkBlock.utils.js";
+import {
+    AGENT_TALK_DIRECT_BODY_MAX_BYTES,
+    AGENT_TALK_DIRECT_REFUSAL,
+    AGENT_TALK_DIRECT_TAKEN,
+    createAgentTalkDirectBody,
+    getAgentTalkDirectRequestHeaders,
+    readAgentTalkDirectBody,
+    type AgentTalkDirectResponse,
+} from "./agentTalkDirect.utils.js";
 import { getIsAgentTalkStepFresh } from "./agentTalkFreshness.utils.js";
-import { getIsJsonObject } from "./agentTalkJson.utils.js";
+import { signAgentTalkServiceDocument, type AgentTalkServiceDocument } from "./agentTalkServiceDocument.utils.js";
 import { checkAgentTalkServiceToken, createAgentTalkServiceToken } from "./agentTalkServiceToken.utils.js";
 import { formatAgentTalkHeader } from "./agentTalkHeader.utils.js";
 import { exportAgentTalkPublicKeyJwk, generateAgentTalkSigningKeyPair, importAgentTalkPublicKeyJwk } from "./agentTalkJws.utils.js";
@@ -44,8 +41,8 @@ export type AgentTalkReferenceReceived = { htmlContent: string; from: string; me
 // a service's published key, as its key set lists it
 export type AgentTalkReferenceKey = JsonWebKey & { kid: string };
 
-// an a2a call as it goes over https: the headers and the json-rpc body
-export type AgentTalkReferenceA2aRequest = { headers: Record<string, string>; body: string };
+// a direct call as it goes over https: the headers and the body
+export type AgentTalkReferenceDirectRequest = { headers: Record<string, string>; body: string };
 
 // a service token is remembered this long, longer than it lives, so it is taken once
 const SERVICE_TOKEN_REMEMBER_MS = 10 * 60 * 1000;
@@ -55,9 +52,9 @@ const getId = (prefix: string): string => `${prefix}_${crypto.randomUUID().repla
 // a whole agent talk service on this package alone, for one person: its own issuer and key, the email it sends with an ask
 // or an answer, and the one way a step from another service gets in. it is the example a service other than input follows,
 // and the second participant input's own tests talk to
-export async function createAgentTalkReferenceParticipant(input: { issuer: string; address: string; a2aUrl?: string }) {
+export async function createAgentTalkReferenceParticipant(input: { issuer: string; address: string; directUrl?: string }) {
     const { issuer, address } = input;
-    const a2aUrl = input.a2aUrl ?? `https://${issuer}/a2a`;
+    const directUrl = input.directUrl ?? `https://${issuer}/agent-talk/steps`;
     const pair = await generateAgentTalkSigningKeyPair();
     const kid = `${issuer}-key`;
     const key: AgentTalkSigningKey = { kid, privateKey: pair.privateKey };
@@ -99,23 +96,22 @@ export async function createAgentTalkReferenceParticipant(input: { issuer: strin
         );
     };
 
-    // a2a admission: the service token by a recognised key for this endpoint, not seen before; then the step, validated, signed
-    // by the same service, current, and for this person. every failure is the same refusal
-    const admitA2aStep = async (
-        request: AgentTalkReferenceA2aRequest,
-        message: unknown,
+    // direct admission: the service token by a recognised key for this url, not seen before; then the step, validated, signed by
+    // the same service, current, and for this person. every failure is the same refusal
+    const admitDirectStep = async (
+        request: AgentTalkReferenceDirectRequest,
+        received: unknown,
         now: Date,
     ): Promise<AgentTalkSignedStep | null> => {
         const bearer = /^Bearer (.+)$/.exec(request.headers.authorization ?? "")?.[1];
-        const token = bearer ? await checkAgentTalkServiceToken({ token: bearer, audience: a2aUrl, now, getPublicKey }) : null;
+        const token = bearer ? await checkAgentTalkServiceToken({ token: bearer, audience: directUrl, now, getPublicKey }) : null;
         if (!token?.isValid) return null;
         for (const [jti, until] of seenTokens) if (until < now.getTime()) seenTokens.delete(jti);
         if (seenTokens.has(token.claims.jti)) return null;
         seenTokens.set(token.claims.jti, now.getTime() + SERVICE_TOKEN_REMEMBER_MS);
 
-        const read = readAgentTalkA2aMessage(message);
-        const validation = read ? validateAgentTalkSignedStep(read.step) : null;
-        if (!validation?.isValid) return null;
+        const validation = validateAgentTalkSignedStep(received);
+        if (!validation.isValid) return null;
         const { seq: _seq, ...step } = validation.value;
         if (!(await verifyAgentTalkStep(step, token.claims.iss, getPublicKey))) return null;
         if (!getIsAgentTalkStepFresh(step, now) || steps.has(step.id) || !getIsForThisPerson(step, now)) return null;
@@ -134,10 +130,23 @@ export async function createAgentTalkReferenceParticipant(input: { issuer: strin
         };
     };
 
+    const getDocumentFields = (): AgentTalkServiceDocument => ({
+        v: AGENT_TALK_SERVICE_DOCUMENT_VERSION,
+        issuer,
+        name: issuer,
+        description: "An agent talk reference participant",
+        provider: { organization: issuer, url: `https://${issuer}` },
+        keys: `https://${issuer}/.well-known/agent-talk-keys.json`,
+        carriers: [{ type: AGENT_TALK_CARRIER_TYPE.HTTPS, url: directUrl }],
+        doors: `https://${issuer}/agent-talk/doors/{address}`,
+    });
+
     return {
         issuer,
         address,
         publicKey,
+        documentUrl: `https://${issuer}${AGENT_TALK_SERVICE_WELL_KNOWN_PATH}`,
+        directUrl,
 
         // another service's keys, added by whoever runs this one: recognising a service is its own policy
         async recognise(otherIssuer: string, keys: readonly AgentTalkReferenceKey[]) {
@@ -225,86 +234,51 @@ export async function createAgentTalkReferenceParticipant(input: { issuer: strin
             return step;
         },
 
-        // its own agent card, signed: where its a2a endpoint and key set are
-        async getCard() {
-            return await createAgentTalkServiceCard({
-                name: issuer,
-                description: "An agent talk reference participant",
-                version: "1.0.0",
-                providerOrganization: issuer,
-                providerUrl: `https://${issuer}`,
-                a2aUrl,
-                keysUrl: `https://${issuer}/.well-known/agent-talk-keys.json`,
-                addressCardUrl: `${a2aUrl}/cards/{address}`,
-                key,
-            });
+        // its own document, signed: where its key set is and the url it takes direct steps on
+        async getDocument() {
+            return await signAgentTalkServiceDocument(getDocumentFields(), key);
         },
 
-        // the card of its person's address when the person keeps an open door: the same card with what the door handles and the
-        // tenant its calls are routed by (protocol 9.1)
-        async getOpenDoorCard(tenant: string) {
-            return await createAgentTalkServiceCard({
-                name: address,
-                description: `${address} keeps an open door`,
-                version: "1.0.0",
-                providerOrganization: issuer,
-                providerUrl: `https://${issuer}`,
-                a2aUrl,
-                keysUrl: `https://${issuer}/.well-known/agent-talk-keys.json`,
-                addressCardUrl: `${a2aUrl}/cards/{address}`,
+        // the document of its person's address when the person keeps an open door: the same document with the door's id, which a
+        // first ask to it names, and what it handles (protocol 9.1)
+        async getDoorDocument(doorId: string) {
+            return await signAgentTalkServiceDocument(
+                {
+                    ...getDocumentFields(),
+                    door: {
+                        id: doorId,
+                        address,
+                        handles: [{ id: "question", name: "Question", description: "Anything its person may answer" }],
+                    },
+                },
                 key,
-                tenant,
-                skills: [{ id: "question", name: "Question", description: "Anything its person may answer", tags: [] }],
-            });
+            );
         },
 
-        // the a2a call that carries one of its steps straight to another service's endpoint, with a fresh service token
-        async createA2aRequest(
+        // the direct call that carries one of its steps straight to another service, with a fresh service token for that url
+        async createDirectRequest(
             step: AgentTalkSignedStep,
-            to: { a2aUrl: string; taskId?: string; referenceTaskIds?: string[]; now?: Date },
-        ): Promise<AgentTalkReferenceA2aRequest> {
-            const token = await createAgentTalkServiceToken({ issuer, audience: to.a2aUrl, now: to.now ?? new Date(), key });
-            const message = createAgentTalkA2aMessage(step, { taskId: to.taskId, referenceTaskIds: to.referenceTaskIds });
+            to: { url: string; door?: string; now?: Date },
+        ): Promise<AgentTalkReferenceDirectRequest> {
+            const token = await createAgentTalkServiceToken({ issuer, audience: to.url, now: to.now ?? new Date(), key });
 
-            return { headers: getAgentTalkA2aRequestHeaders(token), body: JSON.stringify(createA2aJsonRpcRequest(step.id, message)) };
+            return { headers: getAgentTalkDirectRequestHeaders(token), body: JSON.stringify(createAgentTalkDirectBody(step, to.door)) };
         },
 
-        // the GetTask call for the task of an ask it sent, which the other service holds
-        async createA2aGetTaskRequest(taskId: string, to: { a2aUrl: string; now?: Date }): Promise<AgentTalkReferenceA2aRequest> {
-            const token = await createAgentTalkServiceToken({ issuer, audience: to.a2aUrl, now: to.now ?? new Date(), key });
-
-            return {
-                headers: getAgentTalkA2aRequestHeaders(token),
-                body: JSON.stringify(createA2aGetTaskRequest(`get_${taskId}`, taskId)),
-            };
-        },
-
-        // its a2a endpoint: one SendMessage carrying one step, taken by the same rules as mail. the headers are checked first,
-        // then every refusal is the same answer
-        async receiveA2a(request: AgentTalkReferenceA2aRequest, now: Date = new Date()): Promise<A2aJsonRpcResponse> {
-            if (request.body.length > AGENT_TALK_A2A_BODY_MAX_BYTES) return createA2aJsonRpcError(null, AGENT_TALK_A2A_REFUSAL);
+        // its direct url: one step per call, taken by the same rules as mail. a body that is not one is said as such; after that
+        // every refusal is the same answer
+        async receiveDirect(request: AgentTalkReferenceDirectRequest, now: Date = new Date()): Promise<AgentTalkDirectResponse> {
+            if (request.body.length > AGENT_TALK_DIRECT_BODY_MAX_BYTES) return AGENT_TALK_DIRECT_REFUSAL;
             let body: unknown;
             try {
                 body = JSON.parse(request.body);
             } catch {
-                return createA2aJsonRpcError(null, { code: -32700, message: "Parse error" });
+                body = null;
             }
-            const id = getIsJsonObject(body) && (typeof body.id === "string" || typeof body.id === "number") ? body.id : null;
-            const headerError = getAgentTalkA2aHeaderError({
-                version: request.headers[A2A_HEADER.VERSION.toLowerCase()],
-                extensions: request.headers[A2A_HEADER.EXTENSIONS.toLowerCase()],
-            });
-            if (headerError) return createA2aJsonRpcError(id, headerError);
-            if (!getIsJsonObject(body) || body.method !== "SendMessage" || !getIsJsonObject(body.params)) {
-                return createA2aJsonRpcError(id, AGENT_TALK_A2A_REFUSAL);
-            }
+            const read = readAgentTalkDirectBody(body);
+            if (!read.isValid) return read.response;
 
-            const message = body.params.message;
-            const step = await admitA2aStep(request, message, now);
-            if (!step) return createA2aJsonRpcError(id, AGENT_TALK_A2A_REFUSAL);
-            const taskId = getIsJsonObject(message) && typeof message.taskId === "string" ? message.taskId : undefined;
-
-            return { jsonrpc: "2.0", id, result: getAgentTalkA2aSendResult(step, taskId, now) };
+            return (await admitDirectStep(request, read.step, now)) ? AGENT_TALK_DIRECT_TAKEN : AGENT_TALK_DIRECT_REFUSAL;
         },
 
         // the steps it holds of one talk, in the order it took them

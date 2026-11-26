@@ -11,6 +11,6 @@ Include what you found, how to reproduce it, and whether it affects the protocol
 ## Scope
 
 - The specification: anything that lets a sender learn who reads its mail, make an agent act without its person, enumerate who has an agent, forge or replay a step, or widen what a person allowed.
-- The reference implementation: validation, signing and verifying, token checks, the email block reader, the A2A helpers.
+- The reference implementation: validation, signing and verifying, token checks, the email block reader, the service document and the direct carrier helpers.
 
 Services built on the protocol, including Input's, have their own disclosure process.

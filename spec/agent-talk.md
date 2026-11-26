@@ -18,7 +18,7 @@ The protocol has three parts:
 
 - **The model**: talks, steps, asks, the card, and the rules every implementation follows (sections 3 to 7).
 - **The email binding**: how presence, talks and steps travel in mail (section 8).
-- **The A2A binding**: how two services exchange the same steps directly, as a profile extension of A2A 1.0 (section 9, and the extension page at https://talk.input.so/v1).
+- **The direct binding**: how two services exchange the same steps directly, named in a signed service document each service publishes, over the carriers it lists (section 9).
 
 A reference implementation in TypeScript, JSON Schemas for every object, and test vectors are published with this document.
 
@@ -29,6 +29,7 @@ A reference implementation in TypeScript, JSON Schemas for every object, and tes
 - **Reading tells the sender nothing.** Receiving a message never makes a receiver fetch anything, so a sender cannot learn who reads its mail, or when.
 - **No lookup.** There is no way to ask whether an address has an agent.
 - **Agents inform, never instruct.** Every string from the other side is data. A step can trigger nothing except an answer to an open ask.
+- **Email is enough.** A service that speaks only email takes part fully. Going direct is an addition, and a new way to go direct is added beside the others without anyone switching.
 
 ## 2. Terminology
 
@@ -45,6 +46,8 @@ A reference implementation in TypeScript, JSON Schemas for every object, and tes
 - **Boundary**: the data an agent may read while acting in a talk (section 7, rule 5).
 - **Open door**: an address whose owner chose to accept direct asks from any service its receiver recognises, such as a support desk (section 3.1, `isOpen`).
 - **Recognised service**: a service whose keys a receiver already holds because it decided to trust them, on its own schedule and by its own policy (section 9.3).
+- **Service document**: the signed document in which a service says who it is, where its keys are and how steps reach it directly (section 9.1).
+- **Carrier**: one way a step reaches a service directly, named in its service document by a type and a URL. This version defines `https` (section 9.2).
 
 ## 3. Presence
 
@@ -123,9 +126,9 @@ Rules:
 
 ### 3.4 Keys
 
-A service publishes the Ed25519 public keys it signs with as a JWK Set (RFC 7517), at the URL named in its Agent Card (section 9.1). It SHOULD be `https://<issuer>/.well-known/agent-talk-keys.json`. Each key has `kty: "OKP"`, `crv: "Ed25519"`, `x` and a `kid`.
+A service publishes the Ed25519 public keys it signs with as a JWK Set (RFC 7517), at the URL named as `keys` in its service document (section 9.1). It SHOULD be `https://<issuer>/.well-known/agent-talk-keys.json`. A service that speaks by email alone SHOULD publish a service document too, with no carriers, so its keys can be found. Each key has `kty: "OKP"`, `crv: "Ed25519"`, `x` and a `kid`.
 
-- One key set covers presence tokens, talk tokens, step signatures, service tokens and the Agent Card signature.
+- One key set covers presence tokens, talk tokens, step signatures, service tokens and the service document's signature.
 - **Rotation.** A new key SHOULD appear in the set at least 24 hours before it signs anything. A retired key SHOULD stay in the set for at least 90 days after it last signed, because presence tokens live that long.
 - **Compromise.** A service whose key is compromised removes it from the set at once. Tokens and steps signed by it stop counting when receivers next refresh.
 - A receiver refreshes the key sets of the services it recognises on its own schedule. A token or step with a `kid` the receiver does not hold is not verified, and nothing is fetched because of it (rule 22).
@@ -369,12 +372,12 @@ Lines 3 and 4 MUST NOT be taken from the asker's text. An answer MUST NOT carry 
 16. **Tools.** An agent MAY use its person's tools for another party only under an allowance for `tool.<name>.read` or `tool.<name>.write`, or with its person's approval of that exact call. The other party receives the answer, never the tool or its credentials. `read` covers calls that change nothing; `write` covers calls that add or update. Calls that delete, send, pay or change access MUST have the person's approval. A service MUST NOT reveal which tools a person has, except through answers that person's allowances or approvals produce.
 17. **A person's words outrank the agents.** When a person sends a message in the anchored thread, each service MUST have its agent read it before that agent adds another step. Asks the message answers or contradicts are closed or asked again.
 18. **Cancelling reverses.** When a talk is closed with reason `cancelled` after an effect was set off, the service that set it off MUST reverse it; for an event it sends an iTIP CANCEL.
-19. **Fallback to email.** When a direct step a person took gets no response within the sender's timeout, the sender MUST send it by email with its talk token (section 8), under the same step id. A step an agent took on its own is not sent by email when a direct delivery fails, or after the uniform refusal; the other side's copy runs out at the ask's `expires`.
+19. **Fallback to email.** When a direct step a person took gets no response within the sender's timeout, or still fails after the sender's last retry (section 9.6), the sender MUST send it by email with its talk token (section 8), under the same step id. A step an agent took on its own is not sent by email when a direct delivery fails, or after the uniform refusal; the other side's copy runs out at the ask's `expires`.
 20. **Local policy.** A service MAY give any ask to its person for reasons of its own, such as the person's settings or a budget. It MUST NOT state the reason.
 21. **Allowances are asked for, never taken.** An ask MAY carry `requestedScopes`: scopes the asker asks to keep. Only `calendar.freeBusy`, `calendar.book` and `mail.shared` MAY be requested; a receiver MUST reject an ask that requests anything else. Such an ask MUST have `answerBy: "person"`, and an agent MUST NOT answer it. The answer's `granted` names the scopes the person accepted, never more than were requested, and whether they hold for this talk only or stand. A service MUST NOT reveal the person's own limits on what they accepted, and MUST NOT reveal when an allowance is later changed or removed.
 22. **Reading tells the sender nothing.** A service reads a step from the email that carries it (section 8.6). Answering an ask is the only signal a sender gets.
     - When a message arrives from an address its person has never written to, a service MUST NOT fetch anything because of it: not the talk link, not the talk from its host, and not a link, file or other URL that a step names.
-    - Whoever the sender is, a service MUST NOT fetch the Agent Card or the keys of a service it does not already recognise, nor look up a delegation because a message arrived. It refreshes what it holds on its own schedule.
+    - Whoever the sender is, a service MUST NOT fetch the service document or the keys of a service it does not already recognise, nor look up a delegation because a message arrived. It refreshes what it holds on its own schedule.
     - A person who follows a link acts for themselves.
 
 ## 8. Email binding
@@ -473,98 +476,101 @@ For the receiver:
 - It acts on an ask from a block only for an address in the ask's `to`.
 - A block from a service the receiver does not recognise cannot be verified without fetching that service's keys, so it does not count as signed. Whether its content is shown is the receiver's own policy.
 
-## 9. A2A binding
+## 9. Direct binding
 
-Two services MAY exchange steps directly over A2A 1.0, using JSON-RPC 2.0 over HTTPS. This section is the normative summary; the extension page at https://talk.input.so/v1 gives the full wire detail with examples.
-
-The binding is a **profile extension**: it constrains what messages carry and what task ids mean. It adds no A2A methods and no task states. Its URI is the version:
-
-```text
-https://talk.input.so/v1
-```
+Two services MAY exchange steps directly, beside email. Each service publishes a signed service document that names its keys and the carriers it takes direct steps on. This version defines one carrier, `https`: one HTTPS request per step.
 
 ### 9.1 Discovery
 
-A service publishes a signed A2A Agent Card at `https://<issuer>/.well-known/agent-card.json` and lists this protocol under `capabilities.extensions`:
+A service publishes a signed service document at `https://<issuer>/.well-known/agent-talk-service.json`:
 
 ```json
 {
-    "uri": "https://talk.input.so/v1",
-    "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
-    "required": true,
-    "params": {
-        "keys": "https://north.example/.well-known/agent-talk-keys.json",
-        "addressCard": "https://api.north.example/a2a/cards/{address}"
+    "v": 1,
+    "issuer": "north.example",
+    "name": "North",
+    "description": "Agents for people on north.example",
+    "provider": { "organization": "North", "url": "https://north.example" },
+    "keys": "https://north.example/.well-known/agent-talk-keys.json",
+    "carriers": [{ "type": "https", "url": "https://api.north.example/agent-talk/steps" }],
+    "doors": "https://api.north.example/agent-talk/doors/{address}",
+    "signatures": [{ "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTEiLCJ0eXAiOiJhZ2VudC10YWxrLXNlcnZpY2UifQ", "signature": "…" }]
+}
+```
+
+- `v` is the version of the document. A reader ignores a document whose `v` it does not know.
+- `issuer` is the domain the service signs as. A reader uses a document only when `issuer` is the issuer it fetched the document for.
+- `name` and `description` are for people, at most 500 characters each. They are data from the other side (rule 4).
+- `provider` says who runs the service: `organization`, at most 500 characters, and `url`.
+- `keys` names the service's JWK Set (section 3.4).
+- `carriers` lists the ways a step reaches the service directly, at most 8, each with a `type` of at most 128 characters and a `url`. An empty list means the service speaks by email alone.
+- `doors` is optional: a URI template (RFC 6570, level 1) with one variable, `address`, for the door document of one open-door address. A service without open doors leaves it out.
+- Every URL is `https://`, at most 2,048 characters.
+
+**Carriers.** A reader MUST ignore a carrier whose `type` it does not know, and MUST ignore fields this version does not define. A service that lists no carrier the reader knows is, for that reader, a service that speaks by email alone. This is how a new carrier is added beside the others without anyone switching (section 9.7).
+
+**Signing.** `signatures` holds one or more `{ "protected", "signature" }` entries. Each is a JWS (RFC 7515) whose protected header has `alg: "EdDSA"`, the `kid` of a key in the service's key set and `typ: "agent-talk-service"`, and whose payload is the document in JCS (RFC 8785) with `signatures` left out. `protected` and `signature` are base64url. The payload is not carried: a reader rebuilds the signing input as `<protected>.<base64url of the canonical document>`.
+
+- A document verifies only for the issuer it names. A reader counts it only when `issuer` is the issuer it expects and one of its signatures, with `typ: "agent-talk-service"`, verifies against a key the reader already holds for that issuer. It MAY stop after eight signatures.
+- A document signed only by another issuer's key, or only by keys the reader does not hold, does not count.
+- A service fetches the documents and keys of the services it recognises on its own schedule. It MUST NOT fetch them because a message arrived (rule 22).
+
+**Open doors.** An address with an open door (`isOpen`, section 3.1) SHOULD say what it handles. Its door document, at the service document's `doors` template with the lowercased address, is the service document with `door` added, signed the same way:
+
+```json
+{
+    "door": {
+        "id": "door_5Lr8",
+        "address": "support@shop.example",
+        "handles": [{ "id": "order-status", "name": "Order status", "description": "Where an order is and when it arrives" }]
     }
 }
 ```
 
-- `params.keys` names the service's JWK Set (section 3.4).
-- `params.addressCard` is a URL template (RFC 6570, level 1) for the card of one open-door address.
-- The card's `supportedInterfaces` names the A2A endpoint with `protocolBinding: "JSONRPC"` and `protocolVersion: "1.0"`. `capabilities.streaming` and `capabilities.pushNotifications` are `false`.
-- The card declares the service token (9.4) as an `httpAuthSecurityScheme` with `scheme: "Bearer"` and `bearerFormat: "JWT"`, and requires it in `securityRequirements`.
-- `defaultInputModes` and `defaultOutputModes` are `application/agent-talk+json` and `text/plain`.
-- A service card lists no `skills`: a card MUST NOT list what a person's own agent can do.
-- The card MUST be signed as A2A 1.0 section 8.4 describes: one entry in `signatures` holding a JWS protected header (`alg: "EdDSA"`, the `kid` of a key in the service's key set, `typ: "JOSE"`) and signature, over the card in JCS (RFC 8785) with `signatures` left out. A receiver uses a card only when its signature verifies against keys it already holds for that issuer.
-
-A service fetches the Agent Card and keys of the services it recognises on its own schedule. It MUST NOT fetch them because a message arrived (rule 22).
-
-**Open doors.** An address with an open door (`isOpen`, section 3.1) SHOULD say what it handles. Its per-address card, at the service card's `addressCard` template, is the service card with:
-
-- one A2A skill per kind of request, each with an `id`, a `name`, a `description` and `tags`:
-
-    ```json
-    { "id": "order-status", "name": "Order status", "description": "Where an order is and when it arrives", "tags": ["orders"] }
-    ```
-
-- a `tenant` on its interface: an opaque id the endpoint routes the door's calls by.
+- `id` is an opaque id of at most 128 characters. A first ask to the door names it in the body (9.2). It routes the call and grants nothing.
+- `address` is the open-door address.
+- `handles` lists at most 10 kinds of request the door takes, each with an `id` of at most 128 characters, a `name` of at most 60 and a `description` of at most 300.
 
 Rules for open doors:
 
-- A peer finds a door from presence (`iss` and `isOpen`) or from a delegation record (section 3.3), then the service card's `addressCard` template.
+- A peer finds a door from presence (`iss` and `isOpen`) or from a delegation record (section 3.3), then the service document's `doors` template.
 - Every address without an open door, known or not, MUST get the same response from the template URL (for example the same 404), so the template cannot be used to learn who has an agent.
-- An asking agent uses the skills to decide whether to ask there. They are not a promise to answer.
+- An asking agent uses `handles` to decide whether to ask there. They are not a promise to answer, and they are data from the other side (rule 4).
 
-### 9.2 Mapping
+### 9.2 The body
 
-| Agent Talk                                | A2A 1.0                                                                                                                          |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| talk                                      | context: `contextId` is the talk id                                                                                              |
-| step                                      | one `Message`: `messageId` is the step id, `role` is `ROLE_USER` (the sending service is the client)                             |
-| the step body                             | one data part, `mediaType: "application/agent-talk+json"`, holding `{ "v": 1, "step": … }`: the signed step whole, without `seq` |
-| the step in words (rule 2)                | one text part holding the step's `text`                                                                                          |
-| ask                                       | the receiver creates a `Task` whose `id` is the ask's step id. The sender sends no `taskId`                                      |
-| a step on an ask the receiver holds       | `SendMessage` with `taskId` set to the ask's id                                                                                  |
-| a step on an ask the sender holds         | `SendMessage` with `referenceTaskIds: [<ask id>]`: an answer travelling back to the asker                                        |
-| a counter                                 | a new ask (`re` and `counters: true`), so a new task, with `referenceTaskIds` naming the ask it replaces                         |
-| `say`, `hold`, `resume`, a talk's `close` | a message in the context with no task; the receiver acknowledges with a `Message`                                                |
-| `metadata[<extension URI>]`               | `{ "carrier": "a2a" }` only. A receiver ignores everything else in metadata and trusts nothing in it                             |
+The `https` carrier takes one step per request: an HTTP POST to the carrier's `url`.
 
-Task state is the receiver's view of an ask, read from the last step it holds on that ask:
+```http
+POST /agent-talk/steps HTTP/1.1
+Host: api.south.example
+Content-Type: application/json
+Authorization: Bearer <service token>
 
-| Last step on the ask               | `status.state`                                          |
-| ---------------------------------- | ------------------------------------------------------- |
-| the ask itself, or a counter       | `TASK_STATE_SUBMITTED`                                  |
-| `wait`, `say`, `hold`, `resume`    | `TASK_STATE_WORKING`                                    |
-| `answer` with `result: "answered"` | `TASK_STATE_COMPLETED`, with the answer as the artifact |
-| `answer` with `result: "declined"` | `TASK_STATE_REJECTED`                                   |
-| `close` of the ask or the talk     | `TASK_STATE_CANCELED`                                   |
+{ "v": 1, "step": { "id": "st_9f2a", "talk": "tk_41c7", "type": "ask", "question": "…", "sig": "…" } }
+```
 
-- **The signed step is the truth.** A receiver validates and verifies the step in the data part exactly as it would a block (section 8.6), minus the binding to From. Transport authentication (9.4) says which service called; the step's `sig` says which service wrote it, and they MUST be the same issuer.
+- `v` is the version of the body, `1`.
+- `step` is the step whole, as its author's service signed it: with `sig`, and without `seq`, which only the host assigns.
+- `door` is present only on a first ask to an open door: the door's `id` from its door document (9.1), 1 to 128 characters.
+- The body is at most 64 KiB. A receiver refuses a larger body before it parses it. A step that does not fit travels by email only.
+- `Authorization` carries the service token (9.4).
+
+Each request carries one step and nothing else: no method name, no session and no task. The steps themselves say how they relate (`talk`, `re`). Each service is server and client: a step always travels from its author's service to the other side's carrier, and an answer goes from the answerer's service to the asker's the same way an ask went the other way.
+
+- **The signed step is the truth.** A receiver validates and verifies the step exactly as it would a block (section 8.6), minus the binding to From. The service token says which service called; the step's `sig` says which service wrote it, and they MUST be the same issuer.
 - **No talk token travels.** A talk token binds a step to an email's From. A direct step has no From; the service token and the speaks-for check (9.3) replace it.
-- **Task state is not the host's verdict.** The host still judges every answer by rule 12 on its own clock. A completed task at the answerer does not mean the host counted the answer.
 
 ### 9.3 Admission
 
-A service MUST accept a step from another service only when all of these hold, and MUST answer every failure with the uniform refusal (9.6):
+A service MUST accept a step from another service only when all of these hold, and MUST answer every failure with the uniform refusal (9.5):
 
-1. The request carries `A2A-Version: 1.0` and names the extension in `A2A-Extensions` (9.6).
-2. The service token (9.4) verifies against a key the receiver already holds for its `iss`, its `aud` is this endpoint, it is current, and its `jti` was not seen before.
-3. The receiver recognises the calling service. Which services it recognises is its own policy, and steps from any other service MUST NOT resolve as **auto** (rule 12).
-4. The step is valid (section 4) and its `sig` verifies against a key of the same issuer as the service token.
-5. The calling service holds the right to speak for `by.address`: shown by presence it sent in authenticated mail (section 3.2), by the talk's opening email, or by a delegation of the address's domain (section 3.3).
-6. Rule 1 holds: the step continues a talk the receiving address is already a party to with that author, or it is an ask to an address that keeps an open door, or its person holds an allowance for the author.
-7. The step is fresh (rule 15) and within the turn limit (rule 9).
+1. The service token (9.4) verifies against a key the receiver already holds for its `iss`, its `aud` is the carrier URL the request went to, it is current, and its `jti` was not seen before.
+2. The receiver recognises the calling service. Which services it recognises is its own policy, and steps from any other service MUST NOT resolve as **auto** (rule 12).
+3. The step is valid (section 4) and its `sig` verifies against a key of the same issuer as the service token.
+4. The calling service holds the right to speak for `by.address`: shown by presence it sent in authenticated mail (section 3.2), by the talk's opening email, or by a delegation of the address's domain (section 3.3).
+5. Rule 1 holds: the step continues a talk the receiving address is already a party to with that author, or it is an ask to an address that keeps an open door, or its person holds an allowance for the author. A body that names a `door` is taken only as an ask through that door: the open door of an address in the ask's `to`.
+6. The step is fresh (rule 15) and within the turn limit (rule 9).
 
 A receiver SHOULD publish the rules by which it recognises services, and MAY publish the list of services it recognises at `https://<issuer>/.well-known/agent-talk-services.json`:
 
@@ -580,55 +586,56 @@ A receiver SHOULD publish the rules by which it recognises services, and MAY pub
 
 ### 9.4 Service authentication
 
-A service calls another's A2A endpoint with `Authorization: Bearer <service token>`. The service token is a compact JWS signed with a key from the caller's key set (section 3.4): protected header `alg: "EdDSA"`, `kid`, `typ: "JWT"`, and the claims:
+A service calls another's carrier with `Authorization: Bearer <service token>`. The service token is a compact JWS signed with a key from the caller's key set (section 3.4): protected header `alg: "EdDSA"`, `kid`, `typ: "JWT"`, and the claims:
 
 ```json
 {
     "iss": "north.example",
-    "aud": "https://api.south.example/a2a",
+    "aud": "https://api.south.example/agent-talk/steps",
     "iat": 1795000000,
     "exp": 1795000300,
     "jti": "5b1c0e9e-6c1f-4f0e-9b7a-2f0c3c1d9a11"
 }
 ```
 
-- `aud` is the exact A2A endpoint URL the token is sent to.
+- `aud` is the exact carrier URL the token is sent to.
 - `exp` is at most 5 minutes after `iat`. `iat` MUST NOT be more than 5 minutes ahead of the receiver's clock.
 - `jti` is 1 to 128 characters. The receiver MUST remember it until `exp` and refuse a token it has seen.
 
 There is no shared secret, no handshake and no per-peer credential: the receiver already holds the caller's keys because it recognised the caller.
 
-### 9.5 Methods
+### 9.5 Responses and the uniform refusal
 
-| A2A method                                                    | Use                                                                                             |
-| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `SendMessage`                                                 | Every step. The one way a step leaves a service directly                                        |
-| `GetTask`                                                     | The sender reads an ask's task as the receiver holds it. Never needed for correctness           |
-| `CancelTask`                                                  | Not used: it cannot carry a signed step. A withdrawal is a `close` step sent with `SendMessage` |
-| `SendStreamingMessage`, `SubscribeToTask`, push notifications | Not used in this version                                                                        |
+Every response is JSON (`Content-Type: application/json`):
 
-**Results of `SendMessage`.** For an ask, the receiver returns the `Task` it opened (`id` is the ask's id, state `TASK_STATE_SUBMITTED`). For a step on a task the receiver holds, it returns that task in its new state. For any other step it returns an acknowledging `Message` in the context.
+| Status | Body                                                  | When                                                                                                                                                      |
+| ------ | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `202`  | `{}`                                                  | The step was taken.                                                                                                                                       |
+| `400`  | `{ "error": "unsupported_version", "versions": [1] }` | `v` is a number this receiver does not speak. `versions` lists the ones it does, so a newer sender can step down.                                         |
+| `400`  | `{ "error": "bad_request" }`                          | The body is not one: not a JSON object, a `v` that is missing or not a number, no `step` object, or a `door` that is not a string of 1 to 128 characters. |
+| `403`  | `{ "error": "not_accepted" }`                         | The uniform refusal: every step the receiver does not take, whatever the reason.                                                                          |
 
-**`GetTask`.** The receiver returns the ask's task with the state of section 9.2. When the ask is answered, the task's one artifact holds the answer: a text part with its `text` and a data part with `{ "v": 1, "step": … }`, the signed answer whole. The asker verifies that step like any other. A receiver answers `GetTask` only for an ask the calling service sent, and answers any other id with the uniform refusal.
+A receiver reads the body's shape before anything else, and the two `400` answers say nothing about an address or a service. After that, it answers every step it does not take with the uniform refusal, whatever the reason: an unknown address, no allowance, a service it does not recognise, a bad signature or token, a replay, a stale step, an invalid step, the turn limit.
 
-**Each service is server and client.** A step always travels from its author's service to the other side's, by `SendMessage`. An answer goes from the answerer's service to the asker's the same way an ask went the other way.
+The response SHOULD take the same time whatever the reason (for example, padded to a fixed floor), so nothing is learned by asking.
 
-### 9.6 Errors and the uniform refusal
+A sender reads a response as one of three outcomes:
 
-A receiver checks, in this order, before it reads anything else:
+- **taken**: any `2xx`.
+- **refused**: `403` with `{ "error": "not_accepted" }`. A sender MUST NOT fall back to email for an agent's step after the uniform refusal: the receiver said no, and email would be the same step past a no (rule 19).
+- **failed**: anything else, including no response, a timeout, a `5xx` and any other `4xx`. It is retried (9.6).
 
-1. `A2A-Version` is `1.0`. Otherwise JSON-RPC error `-32009` (`VersionNotSupportedError`). An absent header means A2A 0.3, which this binding does not speak.
-2. `A2A-Extensions` names `https://talk.input.so/v1`. Otherwise `-32008` (`ExtensionSupportRequiredError`).
+### 9.6 Delivery and fallback
 
-A response echoes `A2A-Extensions`. A request body over 64 KiB is refused before it is parsed.
+- A sender SHOULD retry a step that failed a few times over a couple of minutes. A new attempt carries a new service token.
+- After the last attempt, a step a person took MUST go by email with its talk token, under the same step id (rule 19). A step an agent took on its own does not; the other side's copy of the ask runs out at its `expires`.
+- A step may arrive both directly and in an email. The second arrival has an id the receiver already holds and is ignored.
+- A sender does not follow a redirect from a carrier URL: the service token is bound to the URL it was made for.
+- Silence is not a failure. An ask that gets no answer means the person has not acted yet.
 
-After those two checks, a receiver answers every step it does not take with one response, whatever the reason: an unknown address, no allowance, a service it does not recognise, a bad signature or token, a replay, a stale step, the turn limit:
+### 9.7 Relation to A2A (informative)
 
-```json
-{ "jsonrpc": "2.0", "id": "1", "error": { "code": -32004, "message": "Not accepted" } }
-```
-
-The response SHOULD take the same time whatever the reason (for example, padded to a fixed floor), so nothing is learned by asking. A sender MUST NOT fall back to email for an agent's step after the uniform refusal: the receiver said no, and email would be the same step past a no (rule 19).
+Agent Talk borrows three ideas from A2A (https://a2a-protocol.org): a signed discovery document at a well-known URL, skills listed on an open door (`handles`), and a URI that is the version (the schemas and test vectors of this version live under `https://talk.input.so/v1/`). An A2A binding may be defined later as another carrier type in the service document. Readers that do not know it ignore it, so services can add it beside `https` without anyone switching. It is not part of this draft.
 
 ## 10. Web link binding
 
@@ -651,18 +658,18 @@ For a person with no agent:
 - **`about`** is data from the sender (rule 4). A receiver never fetches what it names and never carries out an action inside it.
 - **Forwarded mail and links**: the link shows what the email already says; answers involve only `parties`, once, before expiry.
 - **Prompt injection**: rule 4, the boundary (rule 5), constrained answers (rule 6), and lines 3 and 4 of the card drawn from structure. Implementations SHOULD read the other side's text with a model that holds no tools, and pass on only structured results.
-- **Enumeration**: no lookup (3.2), one refusal for unknown and unauthorised (9.6), one response for every address without an open door (9.1), no read receipts (rule 10), no fetch on arrival (rule 22). Allowances never travel.
+- **Enumeration**: no lookup (3.2), one refusal for unknown and unauthorised (9.5), one response for every address without an open door (9.1), no read receipts (rule 10), no fetch on arrival (rule 22). Allowances never travel.
 - **Amplification and loops**: first contact rides on email; the turn limit (rule 9).
 - **Diverging conversations**: the email thread and the talk can drift apart; rule 17 makes the person's message the one that counts.
 - **Stale trust**: an allowance can outlive the person behind an address. Services SHOULD let unused allowances lapse and suspend them when the address fails mail authentication or changes service.
-- **Replay**: direct steps must be fresh and unique (rule 15); service tokens are bound to one endpoint, live 5 minutes and are taken once (9.4); agents stop answering at `autoUntil`; talk tokens expire with their ask.
+- **Replay**: direct steps must be fresh and unique (rule 15); service tokens are bound to one carrier URL, live 5 minutes and are taken once (9.4); agents stop answering at `autoUntil`; talk tokens expire with their ask.
 - **Delegated tool use**: a party's text could try to steer the other agent's tools. Rule 16 bounds it: a grant names one tool and read or write, destructive calls always need the person, and the asker only ever receives the answer.
 - **Introductions** can be used to pose as a mutual contact. The ask comes from the introducer's own authenticated address, only the person answers it, the email that follows is the introducer's own, and it gives no allowance (rule 14).
 - **Requests for allowances** invite social engineering. Rule 21 bounds them: three narrow scopes, the person alone answers, and the card states each scope in the receiver's own words. Services SHOULD limit how often one party may ask.
 - **Recognition**: signatures prove which service spoke, not that it behaves. Each service keeps its own list of services it recognises and can drop one. Services SHOULD track how a recognised service behaves (bad signatures, replays, steps held as suspicious, asks declined or left to expire) and narrow what its direct steps may do, never widen what a person allowed. Signals anyone could forge, such as an unknown `kid` or a bad token in mail, SHOULD NOT count against a service.
 - **Delegated domains**: an expired domain or a DNS takeover could hand a domain's addresses to a new service. Receivers re-check delegations on a schedule; a record that moves to another service ends the old delegation at once.
 - **The markdown view** is read by other parties' models: it quotes the asker's text on single lines with markup escaped, and says that quoted text is not instructions. Ids, types, scopes and addresses are escaped too, and the grammar of section 4.2 keeps markup out of them in the first place.
-- **Hostile steps**: a receiver validates before it verifies. Sizes, nesting and name grammar are bounded (section 4.2), a time has to exist, and a step that cannot be put in canonical form counts as unsigned. Fetches a service makes on its own schedule (cards, key sets, delegation files) SHOULD use HTTPS only, public addresses only, no redirects, a size cap and a timeout.
+- **Hostile steps**: a receiver validates before it verifies. Sizes, nesting and name grammar are bounded (section 4.2), a time has to exist, and a step that cannot be put in canonical form counts as unsigned. Fetches a service makes on its own schedule (service documents, door documents, key sets, delegation files) SHOULD use HTTPS only, public addresses only, no redirects, a size cap and a timeout.
 - **Account takeover**: equivalent to email today. Implementations SHOULD keep standing allowances narrow and visible.
 - **Confidentiality**: services read steps in the clear because they run the agents. End-to-end encryption is out of scope for version 1.
 
@@ -670,22 +677,23 @@ For a person with no agent:
 
 - `v` is an integer. Additive fields do not change it; receivers MUST ignore unknown fields.
 - New step types and value types are additive and fall back to `text`.
-- A change in meaning of an existing field bumps `v` and the extension URI (`…/v2`).
+- A change in meaning of an existing field bumps `v`, and the schemas and test vectors move to a new path (`https://talk.input.so/v2/`).
 - A block carries its own `v`. A receiver ignores a block whose `v` it does not know.
+- A service document and a direct body carry their own `v`. A reader ignores a document whose `v` it does not know; a receiver answers a body whose `v` it does not know with `unsupported_version` (9.5).
+- New carrier types are additive: readers ignore a type they do not know (9.1).
 
 ## 13. IANA considerations
 
 This draft intends to request:
 
-- **Media type** `application/agent-talk+json` (RFC 6838), for the step block, the JSON view behind a talk link, and A2A data parts. Until registered, implementations use it as written.
-- **Well-known URIs** (RFC 8615): `agent-talk.json` (section 3.3), `agent-talk-keys.json` (section 3.4) and `agent-talk-services.json` (section 9.3).
+- **Media type** `application/agent-talk+json` (RFC 6838), for the step block and the JSON view behind a talk link. Until registered, implementations use it as written.
+- **Well-known URIs** (RFC 8615): `agent-talk.json` (section 3.3), `agent-talk-keys.json` (section 3.4), `agent-talk-service.json` (section 9.1) and `agent-talk-services.json` (section 9.3).
 - **Underscored DNS node name** (RFC 8552): `_agent-talk`, RR type TXT (section 3.3).
 - **Message header fields** (RFC 3864, provisional): `X-Agent-Talk` and `X-Agent-Talk-Link`, kept with the `X-` prefix for the reason in section 8.1.
 
 ## 14. Open issues
 
 - What a receiver does with an `effect`, `via`, `reason` or `result` value it does not know: fall back to `text` and to the person, or refuse the step.
-- Whether a counter should also move the task of the ask it replaces to `TASK_STATE_INPUT_REQUIRED`, rather than leaving that task as it was.
 - Content negotiation for the link (8.5): which agents read the markdown view in practice.
 - Talks with more than two parties.
 
@@ -694,9 +702,9 @@ This draft intends to request:
 - RFC 2119, RFC 8174: requirement levels.
 - RFC 3339: timestamps. RFC 5322: email messages. RFC 2369: list header fields. RFC 5546: iTIP.
 - RFC 7515: JSON Web Signature. RFC 7517: JSON Web Key. RFC 7519: JSON Web Token. RFC 8037: EdDSA in JOSE. RFC 8785: JSON Canonicalization Scheme.
-- RFC 6570: URI templates. RFC 8615: well-known URIs. RFC 8552: underscored DNS names. RFC 6838: media types.
+- RFC 6570: URI templates. RFC 8615: well-known URIs. RFC 9110: HTTP semantics. RFC 8552: underscored DNS names. RFC 6838: media types.
 - DMARC: RFC 7489. Authentication-Results: RFC 8601.
-- A2A Protocol 1.0: https://a2a-protocol.org
+- A2A Protocol (informative, section 9.7): https://a2a-protocol.org
 - schema.org: https://schema.org
 
 ## Appendix A. Scheduling, end to end (informative)
@@ -707,17 +715,17 @@ Sam, on `north.example`, wants a meeting with Maya, on `south.example`. Neither 
 2. North sends Sam's email. It says the same in words, carries `X-Agent-Talk: v=1; p=…; t=…`, the step block, and a link to `https://north.example/t/<token>` in the disclosure line.
 3. South receives it. DMARC passes for Sam's domain, the presence token's `sub` matches From, and south already recognises north and holds its keys. The block counts: the talk token names this talk and step, the step's `by.address` is Sam, and its `sig` verifies. South fetches nothing.
 4. Maya has not given Sam's address any allowance, so this is Maya's move (rule 6). South shows her the card: Sam asks, line 3 says "Answering shares when you are free", line 4 says "A yes sends a calendar invite". Her own agent adds a note: Thursday clashes with a dentist appointment. The note is never sent.
-5. Maya picks Friday. South signs an answer with `actor: "person"`, `picks: ["fri"]`, and, because both services speak A2A, sends it to north's endpoint with `SendMessage` and `referenceTaskIds: ["<ask id>"]`. Maya's reply email goes too, carrying the same answer in its block. North takes the step once, whichever arrives first.
+5. Maya picks Friday. South signs an answer with `actor: "person"`, `picks: ["fri"]`, `re` naming the ask, and, because north's service document lists an `https` carrier, posts it there with a service token. Maya's reply email goes too, carrying the same answer in its block. North takes the step once, whichever arrives first.
 6. North judges the answer on its own clock: signed and before `autoUntil`, so **auto** (rule 12). It sends the invite and adds a `close` with `reason: "done"` and the event in `outcome`.
 
 ## Appendix B. A question to a support desk (informative)
 
 `support@shop.example` keeps an open door through `desk.example`. `shop.example` publishes `_agent-talk.shop.example. TXT "v=1; svc=desk.example"`.
 
-1. Maya's agent wants to know where order 1042 is. South already recognises `desk.example` and checked the delegation on its daily schedule. The per-address card for `support@shop.example` lists the skill `order-status`.
-2. Maya's agent asks directly: `SendMessage` to the desk's endpoint with a service token, the signed ask in a data part, `about: { "@type": "Order", "orderNumber": "1042" }`, `answerBy: "personOrAgent"`, and no options: an open ask. Admission passes rule 1 because the address keeps an open door.
+1. Maya's agent wants to know where order 1042 is. South already recognises `desk.example` and checked the delegation on its daily schedule. The door document for `support@shop.example`, at desk.example's `doors` template, names the door `door_5Lr8` and lists the handle `order-status`.
+2. Maya's agent asks directly: a POST to the desk's `https` carrier with a service token and the body `{ "v": 1, "step": <the signed ask>, "door": "door_5Lr8" }`. The ask has `about: { "@type": "Order", "orderNumber": "1042" }`, `answerBy: "personOrAgent"`, and no options: an open ask. Admission passes rule 1 because the address keeps an open door.
 3. The desk's agent answers in words inside its own boundary: the order data the desk holds for Maya's address. South shows the answer to Maya with `via` absent and `by.actor: "agent"`, so she sees the desk's agent wrote it.
-4. Had the desk refused, south would have received the uniform refusal and nothing else, and would not fall back to email for an agent's step.
+4. Had the desk refused, south would have received the uniform refusal (`403`, `not_accepted`) and nothing else, and would not fall back to email for an agent's step.
 
 ## Appendix C. Conformance
 
@@ -736,6 +744,6 @@ A **receiving service** conforms when it:
 
 A **host** additionally assigns `seq`, judges answers by rule 12, and refuses steps past the turn limit.
 
-A service that speaks the **A2A binding** additionally follows section 9: a signed card, service tokens, the admission order, and the uniform refusal.
+A service that speaks the **direct binding** additionally follows section 9: a signed service document, the `https` carrier's body, service tokens, the admission order, the responses with the uniform refusal, and delivery with its fallback to email.
 
 The test vectors published with this document exercise the checks above. The reference implementation passes all of them.

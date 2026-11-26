@@ -19,17 +19,28 @@ import {
     checkAgentTalkPresenceToken,
     checkAgentTalkServiceToken,
     checkAgentTalkToken,
+    createAgentTalkDirectBody,
     createAgentTalkPresenceToken,
     createAgentTalkServiceToken,
     createAgentTalkToken,
     formatAgentTalkStepBlock,
     parseAgentTalkDelegationFile,
+    readAgentTalkDirectBody,
+    readAgentTalkServiceDocument,
     readAgentTalkStepBlock,
+    signAgentTalkServiceDocument,
     signAgentTalkStep,
     validateAgentTalkSignedStep,
     validateAgentTalkStep,
+    verifyAgentTalkServiceDocument,
 } from "../../src/index.js";
-import type { AgentTalkPublicKeyResolver, AgentTalkSignedStep, AgentTalkSigningKey, AgentTalkUnsignedStep } from "../../src/index.js";
+import type {
+    AgentTalkPublicKeyResolver,
+    AgentTalkServiceDocument,
+    AgentTalkSignedStep,
+    AgentTalkSigningKey,
+    AgentTalkUnsignedStep,
+} from "../../src/index.js";
 
 type JsonObject = Record<string, unknown>;
 
@@ -43,11 +54,13 @@ const SCHEMA_FILES = [
     "talk-token-claims.schema.json",
     "service-token-claims.schema.json",
     "delegation-file.schema.json",
+    "service-document.schema.json",
+    "direct-body.schema.json",
 ];
 
 const NOW = minutesAfterAsk(1);
 const MESSAGE_ID = "<dinner-1@example.com>";
-const AUDIENCE = "https://example.com/a2a";
+const AUDIENCE = "https://example.com/agent-talk/steps";
 const OPENING_TAG = `<script type="${AGENT_TALK_MEDIA_TYPE}">`;
 const CLOSING_TAG = "</script>";
 const textEncoder = new TextEncoder();
@@ -659,6 +672,98 @@ describe("agent talk json schemas", () => {
 
             expect(parseAgentTalkDelegationFile(file)).toEqual([{ svc: "input.so", local: ["support"] }]);
             expect(getIsSchemaValid("delegation-file.schema.json", file)).toBe(false);
+        });
+    });
+
+    describe("service document", () => {
+        const document: AgentTalkServiceDocument = {
+            v: 1,
+            issuer: ISSUER,
+            name: "Input",
+            description: "Input's agent talk service.",
+            provider: { organization: "Input", url: "https://input.so" },
+            keys: "https://input.so/.well-known/agent-talk-keys.json",
+            carriers: [{ type: "https", url: AUDIENCE }],
+            doors: "https://example.com/agent-talk/doors/{address}",
+        };
+        const door = {
+            id: "door_1",
+            address: MAYA,
+            handles: [{ id: "question", name: "Question", description: "Anything its person may answer" }],
+        };
+
+        it.each<[string, AgentTalkServiceDocument]>([
+            ["a service document", document],
+            ["a door document", { ...document, door }],
+            ["a service that speaks by email alone", { ...(without(document, "doors") as AgentTalkServiceDocument), carriers: [] }],
+            ["an unknown carrier type", { ...document, carriers: [{ type: "a2a", url: "https://example.com/a2a" }, ...document.carriers] }],
+        ])("%s passes the code and the schema", async (_, unsigned) => {
+            const signed = JSON.parse(JSON.stringify(await signAgentTalkServiceDocument(unsigned, key))) as JsonObject;
+
+            expect(await verifyAgentTalkServiceDocument(signed, ISSUER, getPublicKey)).toBe(true);
+            expect(readAgentTalkServiceDocument(signed)).not.toBeNull();
+            expect(getSchemaErrors("service-document.schema.json", signed)).toEqual([]);
+        });
+
+        it.each([
+            ["another version", { ...document, v: 2 }],
+            ["keys over http", { ...document, keys: "http://input.so/keys.json" }],
+            ["nine carriers", { ...document, carriers: Array.from({ length: 9 }, () => document.carriers[0]) }],
+            ["a carrier without a url", { ...document, carriers: [{ type: "https" }] }],
+            ["doors without the address variable", { ...document, doors: "https://example.com/agent-talk/doors" }],
+            ["a handle without a description", { ...document, door: { ...door, handles: [{ id: "question", name: "Question" }] } }],
+            ["eleven handles", { ...document, door: { ...door, handles: Array.from({ length: 11 }, () => door.handles[0]) } }],
+            ["no provider", without(document, "provider")],
+        ])("%s is rejected by the code and the schema", async (_, unsigned: JsonObject) => {
+            const signed = { ...unsigned, signatures: (await signAgentTalkServiceDocument(document, key)).signatures };
+
+            expect(readAgentTalkServiceDocument(signed)).toBeNull();
+            expect(getIsSchemaValid("service-document.schema.json", signed)).toBe(false);
+        });
+
+        it("wants a signature, which only code can check", async () => {
+            const signed = await signAgentTalkServiceDocument(document, key);
+            const tampered = { ...signed, name: "Not Input" };
+
+            expect(getIsSchemaValid("service-document.schema.json", without(signed, "signatures"))).toBe(false);
+            expect(await verifyAgentTalkServiceDocument(tampered, ISSUER, getPublicKey)).toBe(false);
+            expect(getIsSchemaValid("service-document.schema.json", tampered)).toBe(true);
+        });
+    });
+
+    describe("direct body", () => {
+        it.each([
+            ["a step", undefined],
+            ["a step for a door", "door_1"],
+        ])("%s matches the body the code writes and reads", (_, door) => {
+            const body = JSON.parse(
+                JSON.stringify(createAgentTalkDirectBody({ ...getSigned("ask"), seq: 3 } as AgentTalkSignedStep, door)),
+            ) as JsonObject;
+
+            expect(readAgentTalkDirectBody(body).isValid).toBe(true);
+            expect(getSchemaErrors("direct-body.schema.json", body)).toEqual([]);
+        });
+
+        it.each([
+            ["another version", { v: 2, step: {} }],
+            ["no step", { v: 1 }],
+            ["a step that is not an object", { v: 1, step: "st_1" }],
+            ["a door that is not a string", { v: 1, step: {}, door: 7 }],
+            ["an empty door", { v: 1, step: {}, door: "" }],
+            ["a door of 129 characters", { v: 1, step: {}, door: "d".repeat(129) }],
+        ])("%s is rejected by the code and the schema", (_, body) => {
+            expect(readAgentTalkDirectBody(body).isValid).toBe(false);
+            expect(getIsSchemaValid("direct-body.schema.json", body)).toBe(false);
+        });
+
+        it("leaves the step to admission in code, where the schema checks it and wants it without seq", () => {
+            const numbered = { v: 1, step: { ...getSigned("ask"), seq: 3 } };
+            const unsigned = { v: 1, step: without(getSigned("ask"), "sig") };
+
+            for (const body of [numbered, unsigned]) {
+                expect(readAgentTalkDirectBody(body).isValid).toBe(true);
+                expect(getIsSchemaValid("direct-body.schema.json", body)).toBe(false);
+            }
         });
     });
 });

@@ -8,7 +8,7 @@ const SERVICE_TOKEN_TYPE = "JWT";
 // a service token lives at most this long (protocol 9.3)
 export const AGENT_TALK_SERVICE_TOKEN_LIFETIME_SECONDS = 5 * 60;
 
-// the claims of the bearer a service calls another's a2a endpoint with: which service calls, the endpoint it is for, and an id
+// the claims of the bearer a service calls another's direct url with: which service calls, the endpoint it is for, and an id
 // the receiver remembers so the same token is never taken twice
 export type AgentTalkServiceTokenClaims = { iss: string; aud: string; iat: number; exp: number; jti: string };
 
@@ -42,7 +42,7 @@ const isServiceTokenClaims = (value: unknown): value is AgentTalkServiceTokenCla
     value.jti.length > 0 &&
     value.jti.length <= 128;
 
-// a compact jws (EdDSA) a service signs with its agent talk key to call another service's a2a endpoint. no shared secret: the
+// a compact jws (EdDSA) a service signs with its agent talk key to call another service's direct url. no shared secret: the
 // receiver already holds the key
 export const createAgentTalkServiceToken = async (input: {
     issuer: string;

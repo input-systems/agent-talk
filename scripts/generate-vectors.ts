@@ -8,9 +8,8 @@ import type {
     AgentTalkSigningKey,
     AgentTalkUnsignedStep,
 } from "../src/agentTalk.types.js";
-import { createAgentTalkServiceCard } from "../src/agentTalkA2a.utils.js";
-import { verifyAgentTalkAgentCard } from "../src/agentTalkAgentCard.utils.js";
 import { formatAgentTalkStepBlock, readAgentTalkStepBlock } from "../src/agentTalkBlock.utils.js";
+import { createAgentTalkDirectBody, getAgentTalkDirectOutcome, readAgentTalkDirectBody } from "../src/agentTalkDirect.utils.js";
 import {
     formatAgentTalkHeader,
     formatAgentTalkLinkHeader,
@@ -25,6 +24,12 @@ import {
     signJws,
     toBase64Url,
 } from "../src/agentTalkJws.utils.js";
+import {
+    readAgentTalkServiceDocument,
+    signAgentTalkServiceDocument,
+    verifyAgentTalkServiceDocument,
+} from "../src/agentTalkServiceDocument.utils.js";
+import type { AgentTalkServiceDocument } from "../src/agentTalkServiceDocument.utils.js";
 import { checkAgentTalkServiceToken, createAgentTalkServiceToken } from "../src/agentTalkServiceToken.utils.js";
 import { signAgentTalkStep, verifyAgentTalkStep } from "../src/agentTalkStep.utils.js";
 import { validateAgentTalkUnsignedStep } from "../src/agentTalkStepValidation.utils.js";
@@ -79,7 +84,7 @@ const EVE = "eve@example.net";
 const TALK_ID = "tk_dinner";
 const ASK_MESSAGE_ID = "<ask-1@north.example>";
 const REPLY_MESSAGE_ID = "<reply-1@south.example>";
-const SOUTH_A2A_URL = "https://south.example/a2a";
+const SOUTH_DIRECT_URL = "https://south.example/agent-talk/steps";
 
 const textEncoder = new TextEncoder();
 
@@ -867,7 +872,7 @@ const talkCases = await createTokenCases(talkInputs, async ({ token, from, now, 
 const createServiceToken = async (overrides: { now?: Date; audience?: string; key?: AgentTalkSigningKey; issuer?: string } = {}) =>
     await createAgentTalkServiceToken({
         issuer: overrides.issuer ?? SERVICE_KEYS.north.issuer,
-        audience: overrides.audience ?? SOUTH_A2A_URL,
+        audience: overrides.audience ?? SOUTH_DIRECT_URL,
         now: overrides.now ?? NOW,
         key: overrides.key ?? signingKeys.north,
         jti: "0b6f2c1e-6a51-4d3e-9a43-3f1b7c2a9d10",
@@ -882,10 +887,10 @@ const signServiceClaims = async (claims: Record<string, unknown>, typ = "JWT") =
 type ServiceTokenInput = Omit<TokenInput, "from"> & { audience?: string };
 
 const serviceInputs: ServiceTokenInput[] = [
-    { name: "valid", description: "north.example calls south.example's A2A endpoint.", token: serviceToken, signer: "north" },
+    { name: "valid", description: "north.example calls south.example's direct url.", token: serviceToken, signer: "north" },
     {
         name: "wrong audience",
-        description: "A token for another endpoint.",
+        description: "A token for another url.",
         token: serviceToken,
         audience: "https://south.example/other",
         signer: "north",
@@ -925,7 +930,7 @@ const serviceInputs: ServiceTokenInput[] = [
     {
         name: "tampered audience",
         description: "aud changed after signing.",
-        token: tamperPayload(serviceToken, (payload) => ({ ...payload, aud: "https://south.example/a2a/" })),
+        token: tamperPayload(serviceToken, (payload) => ({ ...payload, aud: "https://south.example/agent-talk/steps/" })),
     },
     {
         name: "wrong key",
@@ -964,7 +969,7 @@ const serviceCases = await Promise.all(
     serviceInputs.map(async (input) => {
         const now = input.now ?? NOW;
         const receiverKeys = input.receiverKeys ?? RECEIVER_KEYS;
-        const audience = input.audience ?? SOUTH_A2A_URL;
+        const audience = input.audience ?? SOUTH_DIRECT_URL;
         return {
             name: input.name,
             description: input.description,
@@ -1397,88 +1402,275 @@ const blockReadCases = await Promise.all(
     }),
 );
 
-// agent cards
+// service documents
 
-const serviceCard = await createAgentTalkServiceCard({
+const northDocument: AgentTalkServiceDocument = {
+    v: 1,
+    issuer: SERVICE_KEYS.north.issuer,
     name: "North",
     description: "North's agent talk service.",
-    version: "1.0.0",
-    providerOrganization: "North Example",
-    providerUrl: "https://north.example",
-    a2aUrl: "https://north.example/a2a",
-    keysUrl: "https://north.example/.well-known/agent-talk-keys.json",
-    addressCardUrl: "https://north.example/.well-known/agent-talk/address-card",
-    key: signingKeys.north,
-});
-const { signatures: serviceCardSignatures, ...unsignedServiceCard } = serviceCard;
-const [cardSignature] = serviceCardSignatures;
-if (!cardSignature) throw new Error("the card has no signature");
+    provider: { organization: "North Example", url: "https://north.example" },
+    keys: "https://north.example/.well-known/agent-talk-keys.json",
+    carriers: [{ type: "https", url: "https://north.example/agent-talk/steps" }],
+    doors: "https://north.example/agent-talk/doors/{address}",
+};
 
-const rogueCard = await createAgentTalkServiceCard({
-    name: "North",
-    description: "North's agent talk service.",
-    version: "1.0.0",
-    providerOrganization: "North Example",
-    providerUrl: "https://north.example",
-    a2aUrl: "https://north.example/a2a",
-    keysUrl: "https://north.example/.well-known/agent-talk-keys.json",
-    addressCardUrl: "https://north.example/.well-known/agent-talk/address-card",
-    key: getMislabelledKey("north", "rogue"),
-});
+const northDoorDocument: AgentTalkServiceDocument = {
+    ...northDocument,
+    door: {
+        id: "door_5Lr8",
+        address: "support@north.example",
+        handles: [{ id: "order-status", name: "Order status", description: "Where an order is and when it arrives" }],
+    },
+};
 
-const cardVerifyInputs: { name: string; description: string; card: unknown; issuer: string }[] = [
-    { name: "valid", description: "north.example's signed service card.", card: serviceCard, issuer: "north.example" },
+// a carrier type and a field this version does not define: both are signed, and a reader keeps the carrier and drops the field
+const northFutureDocument = {
+    ...northDocument,
+    carriers: [{ type: "a2a", url: "https://north.example/a2a" }, ...northDocument.carriers],
+    logo: "https://north.example/logo.png",
+} as AgentTalkServiceDocument;
+
+const signedNorthDocument = await signAgentTalkServiceDocument(northDocument, signingKeys.north);
+const signedNorthDoorDocument = await signAgentTalkServiceDocument(northDoorDocument, signingKeys.north);
+const signedNorthFutureDocument = await signAgentTalkServiceDocument(northFutureDocument, signingKeys.north);
+const rogueSignedNorthDocument = await signAgentTalkServiceDocument(northDocument, getMislabelledKey("north", "rogue"));
+const [documentSignature] = signedNorthDocument.signatures;
+if (!documentSignature) throw new Error("the document has no signature");
+
+// the same payload under a protected header whose typ is not agent-talk-service
+const [joseProtected = "", , joseSignature = ""] = (
+    await signJws(
+        northDocument,
+        { alg: AGENT_TALK_SIGNING_ALGORITHM, kid: SERVICE_KEYS.north.kid, typ: "JOSE" },
+        signingKeys.north.privateKey,
+    )
+).split(".");
+
+const documentSignInputs: { name: string; description: string; document: AgentTalkServiceDocument }[] = [
+    { name: "sign service document", description: "north.example's service document.", document: northDocument },
+    {
+        name: "sign door document",
+        description: "The door document of support@north.example: the service document with door.",
+        document: northDoorDocument,
+    },
+    {
+        name: "sign with an unknown carrier",
+        description: "A carrier type and a field this version does not define are signed like any other.",
+        document: northFutureDocument,
+    },
+];
+
+const documentVerifyInputs: { name: string; description: string; document: unknown; issuer: string }[] = [
+    { name: "valid", description: "north.example's signed service document.", document: signedNorthDocument, issuer: "north.example" },
     {
         name: "valid with keys in another order",
-        description: "The payload is the card in JCS without signatures.",
-        card: Object.fromEntries(Object.entries(serviceCard).reverse()),
+        description: "The payload is the document in JCS without signatures.",
+        document: Object.fromEntries(Object.entries(signedNorthDocument).reverse()),
         issuer: "north.example",
     },
     {
-        name: "changed field",
-        description: "name changed after signing.",
-        card: { ...serviceCard, name: "Not North" },
+        name: "valid door document",
+        description: "A door document verifies like the service document.",
+        document: signedNorthDoorDocument,
         issuer: "north.example",
     },
-    { name: "other issuer", description: "north.example's card checked as south.example's.", card: serviceCard, issuer: "south.example" },
-    { name: "no signatures", description: "The unsigned card.", card: unsignedServiceCard, issuer: "north.example" },
-    { name: "empty signatures", description: "signatures: [].", card: { ...unsignedServiceCard, signatures: [] }, issuer: "north.example" },
+    {
+        name: "valid with an unknown carrier",
+        description: "A document with a carrier type the reader does not know still verifies.",
+        document: signedNorthFutureDocument,
+        issuer: "north.example",
+    },
+    {
+        name: "tampered name",
+        description: "name changed after signing.",
+        document: { ...signedNorthDocument, name: "Not North" },
+        issuer: "north.example",
+    },
+    {
+        name: "tampered carrier",
+        description: "The https carrier's url changed after signing.",
+        document: { ...signedNorthDocument, carriers: [{ type: "https", url: "https://rogue.example/agent-talk/steps" }] },
+        issuer: "north.example",
+    },
+    {
+        name: "wrong issuer",
+        description: "north.example's document checked as south.example's: a document verifies only for the issuer it names.",
+        document: signedNorthDocument,
+        issuer: "south.example",
+    },
+    {
+        name: "issuer rewritten",
+        description: "issuer changed to south.example after signing, checked as south.example's.",
+        document: { ...signedNorthDocument, issuer: "south.example" },
+        issuer: "south.example",
+    },
+    { name: "no signatures", description: "The unsigned document.", document: northDocument, issuer: "north.example" },
+    { name: "empty signatures", description: "signatures: [].", document: { ...northDocument, signatures: [] }, issuer: "north.example" },
     {
         name: "wrong key",
         description: "Signed with rogue.example's private key under north.example's kid.",
-        card: rogueCard,
+        document: rogueSignedNorthDocument,
         issuer: "north.example",
     },
     {
         name: "a valid signature after a bad one",
-        description: "Any one signature by a key the receiver holds for the issuer is enough.",
-        card: { ...unsignedServiceCard, signatures: [...rogueCard.signatures, cardSignature] },
+        description: "Any one signature by a key the reader holds for the issuer is enough.",
+        document: { ...northDocument, signatures: [...rogueSignedNorthDocument.signatures, documentSignature] },
+        issuer: "north.example",
+    },
+    {
+        name: "another typ",
+        description: "A genuine signature over the same payload whose protected header has typ JOSE.",
+        document: { ...northDocument, signatures: [{ protected: joseProtected, signature: joseSignature }] },
         issuer: "north.example",
     },
 ];
 
-const agentCardCases = [
+const documentReadInputs: { name: string; description: string; document: unknown }[] = [
+    { name: "read service document", description: "The document without its signatures.", document: signedNorthDocument },
+    { name: "read door document", description: "The door document, door included.", document: signedNorthDoorDocument },
     {
-        kind: "sign",
-        name: "sign service card",
-        description:
-            "north.example's service card. The signature is a JWS over the card in JCS with signatures left out; protected is the base64url protected header, and the payload is not carried.",
-        signer: "north.example",
-        card: unsignedServiceCard,
-        expected: {
-            protectedHeader: fromBase64UrlJson(cardSignature.protected),
-            canonicalPayload: getCanonicalJson(unsignedServiceCard),
-            signedCard: serviceCard,
+        name: "unknown carrier kept",
+        description: "A carrier type the reader does not know is kept; a field this version does not define is left out.",
+        document: signedNorthFutureDocument,
+    },
+    { name: "email alone", description: "No carriers: the service speaks by email alone.", document: { ...northDocument, carriers: [] } },
+    { name: "another version", description: "v: 2.", document: { ...northDocument, v: 2 } },
+    { name: "no carriers list", description: "carriers is missing.", document: { ...northDocument, carriers: undefined } },
+    {
+        name: "nine carriers",
+        description: "At most 8 carriers.",
+        document: {
+            ...northDocument,
+            carriers: Array.from({ length: 9 }, (_, index) => ({ type: `x-${index}`, url: "https://north.example/x" })),
         },
     },
+    {
+        name: "carrier over http",
+        description: "Every url is https.",
+        document: { ...northDocument, carriers: [{ type: "https", url: "http://north.example/agent-talk/steps" }] },
+    },
+    { name: "keys over http", description: "Every url is https.", document: { ...northDocument, keys: "http://north.example/keys.json" } },
+    {
+        name: "doors without the address variable",
+        description: "The doors template names {address}.",
+        document: { ...northDocument, doors: "https://north.example/agent-talk/doors" },
+    },
+    {
+        name: "handle without a description",
+        description: "Each handle has an id, a name and a description.",
+        document: {
+            ...northDoorDocument,
+            door: { id: "door_5Lr8", address: "support@north.example", handles: [{ id: "order-status", name: "Order status" }] },
+        },
+    },
+    { name: "no provider", description: "provider is missing.", document: { ...northDocument, provider: undefined } },
+];
+
+const serviceDocumentCases = [
     ...(await Promise.all(
-        cardVerifyInputs.map(async (input) => ({
+        documentSignInputs.map(async (input) => {
+            const signed = await signAgentTalkServiceDocument(input.document, signingKeys.north);
+            return {
+                kind: "sign",
+                ...input,
+                signer: "north.example",
+                expected: {
+                    protectedHeader: fromBase64UrlJson(signed.signatures[0]?.protected ?? ""),
+                    canonicalPayload: getCanonicalJson(input.document),
+                    signedDocument: signed,
+                },
+            };
+        }),
+    )),
+    ...(await Promise.all(
+        documentVerifyInputs.map(async (input) => ({
             kind: "verify",
             ...input,
             receiverKeys: RECEIVER_KEYS,
-            expected: { isValid: await verifyAgentTalkAgentCard(input.card, input.issuer, receiverResolver) },
+            expected: { isValid: await verifyAgentTalkServiceDocument(input.document, input.issuer, receiverResolver) },
         })),
     )),
+    ...documentReadInputs.map((input) => ({
+        kind: "read",
+        ...input,
+        document: JSON.parse(JSON.stringify(input.document)) as unknown,
+        expected: readAgentTalkServiceDocument(JSON.parse(JSON.stringify(input.document))),
+    })),
+];
+
+// direct bodies
+
+const numberedAsk = { ...signedAsk, seq: 3 } as AgentTalkSignedStep;
+const DOOR_ID = "door_5Lr8";
+
+const directCreateInputs: { name: string; description: string; input: { step: AgentTalkSignedStep; door?: string } }[] = [
+    { name: "create body", description: "The signed step whole.", input: { step: signedAsk } },
+    {
+        name: "create body without seq",
+        description: "The host's seq is left out; the signature does not cover it.",
+        input: { step: numberedAsk },
+    },
+    {
+        name: "create body for a door",
+        description: "A first ask to an open door names the door's id.",
+        input: { step: signedAsk, door: DOOR_ID },
+    },
+];
+
+const directReadInputs: { name: string; description: string; body: unknown }[] = [
+    { name: "valid", description: "A step and no door.", body: { v: 1, step: signedAsk } },
+    { name: "valid with a door", description: "A step and the door it is for.", body: { v: 1, step: signedAsk, door: DOOR_ID } },
+    { name: "door of 128 characters", description: "The longest door id.", body: { v: 1, step: signedAsk, door: "d".repeat(128) } },
+    {
+        name: "step still to be checked",
+        description:
+            "The body reader checks only the body's shape; the step is validated and verified after it, and a bad step gets the uniform refusal.",
+        body: { v: 1, step: { id: "st_1" } },
+    },
+    { name: "not an object", description: "A string.", body: "step" },
+    { name: "array", description: "A JSON array.", body: [{ v: 1, step: signedAsk }] },
+    { name: "null", description: "JSON null.", body: null },
+    { name: "no v", description: "v is missing.", body: { step: signedAsk } },
+    { name: "v as a string", description: 'v is "1".', body: { v: "1", step: signedAsk } },
+    { name: "another version", description: "v: 2. The receiver says which versions it speaks.", body: { v: 2, step: signedAsk } },
+    { name: "no step", description: "step is missing.", body: { v: 1 } },
+    { name: "step not an object", description: "step is a string.", body: { v: 1, step: "st_1" } },
+    { name: "door not a string", description: "door: 7.", body: { v: 1, step: signedAsk, door: 7 } },
+    { name: "empty door", description: 'door: "".', body: { v: 1, step: signedAsk, door: "" } },
+    { name: "door too long", description: "A door id of 129 characters.", body: { v: 1, step: signedAsk, door: "d".repeat(129) } },
+];
+
+const directOutcomeInputs: { name: string; description: string; status: number; body: unknown }[] = [
+    { name: "taken", description: "202 with an empty object.", status: 202, body: {} },
+    { name: "taken as any 2xx", description: "200.", status: 200, body: {} },
+    { name: "refused", description: "The uniform refusal.", status: 403, body: { error: "not_accepted" } },
+    {
+        name: "403 with another error",
+        description: "Not the uniform refusal: failed, and retried.",
+        status: 403,
+        body: { error: "forbidden" },
+    },
+    { name: "bad request", description: "The body was not one.", status: 400, body: { error: "bad_request" } },
+    {
+        name: "unsupported version",
+        description: "The receiver speaks another version.",
+        status: 400,
+        body: { error: "unsupported_version", versions: [1] },
+    },
+    { name: "too large", description: "413 from a server's own body limit.", status: 413, body: null },
+    { name: "server error", description: "503.", status: 503, body: null },
+];
+
+const directBodyCases = [
+    ...directCreateInputs.map((input) => ({
+        kind: "create",
+        ...input,
+        expected: JSON.parse(JSON.stringify(createAgentTalkDirectBody(input.input.step, input.input.door))) as unknown,
+    })),
+    ...directReadInputs.map((input) => ({ kind: "read", ...input, expected: readAgentTalkDirectBody(input.body) })),
+    ...directOutcomeInputs.map((input) => ({ kind: "outcome", ...input, expected: getAgentTalkDirectOutcome(input.status, input.body) })),
 ];
 
 mkdirSync(OUTPUT_DIRECTORY, { recursive: true });
@@ -1510,7 +1702,7 @@ writeVectors(
 );
 writeVectors(
     "service-tokens.json",
-    "A2A service tokens (protocol 9.3). Check token for audience at now. Order: malformed (typ not JWT, claims of the wrong shape, jti not 1 to 128 characters), unknownKey, badSignature, wrongAudience, postDated, tooLong (exp - iat over 300 s), expired. A valid result also names the kid; the caller still checks jti was not seen before.",
+    "Service tokens (protocol 9.4). Check token for audience at now. Order: malformed (typ not JWT, claims of the wrong shape, jti not 1 to 128 characters), unknownKey, badSignature, wrongAudience, postDated, tooLong (exp - iat over 300 s), expired. A valid result also names the kid; the caller still checks jti was not seen before.",
     serviceCases,
 );
 writeVectors(
@@ -1524,7 +1716,12 @@ writeVectors(
     [...blockFormatCases, ...blockReadCases],
 );
 writeVectors(
-    "agent-cards.json",
-    "Signed A2A Agent Cards (protocol 9.1). sign: sign card with signer's key and compare the signed card. verify: whether any of the card's signatures checks out against a key the receiver holds for issuer.",
-    agentCardCases,
+    "service-documents.json",
+    "Signed service documents (protocol 9.1). sign: sign document with signer's key and compare the signed document; the signature is a JWS with typ agent-talk-service over the document in JCS with signatures left out, protected is the base64url protected header, and the payload is not carried. verify: whether the document names issuer and any of its first eight signatures checks out against a key the receiver holds for issuer. read: the document as a reader takes it (signatures and fields this version does not define left out, unknown carrier types kept), or null.",
+    serviceDocumentCases,
+);
+writeVectors(
+    "direct-bodies.json",
+    "The https carrier's request body (protocol 9.2) and responses (9.5). create: { step, door? } to the body. read: the parsed JSON body to { isValid: true, step, door } or { isValid: false, response: { status, body } }; a numeric v other than 1 is unsupported_version, anything else malformed is bad_request. A body over 64 KiB is refused before it is parsed, which these cases do not cover. outcome: a response's status and parsed body to taken (2xx), refused (403 not_accepted) or failed (anything else, retried).",
+    directBodyCases,
 );

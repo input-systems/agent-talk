@@ -1,0 +1,21 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://talk.input.so/v1/schemas/direct-body.schema.json",
+    "title": "Agent Talk direct request body",
+    "description": "The body of one POST to a service's https carrier: the signed step whole, without seq, and the door it is for on a first ask to an open door.",
+    "$comment": "Checks only code can do: the body at most 64 KiB; the service token in the Authorization header; the step's sig verifying against a key of the token's iss; admission (protocol 9.3). The reference implementation's body reader checks only that step is an object, and refuses a bad step afterwards with the uniform refusal rather than a 400.",
+    "type": "object",
+    "required": ["v", "step"],
+    "properties": {
+        "v": { "const": 1 },
+        "step": {
+            "allOf": [{ "$ref": "step.schema.json" }, { "not": { "required": ["seq"] } }]
+        },
+        "door": {
+            "description": "The door id from the door document of an address in the ask's to.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+        }
+    }
+}

@@ -13,7 +13,6 @@
         "agent-talk",
         "agents",
         "email",
-        "a2a",
         "protocol",
         "ed25519",
         "jws"

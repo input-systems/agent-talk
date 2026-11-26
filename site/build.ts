@@ -73,12 +73,6 @@ const SPEC_PAGES: SpecPage[] = [
         fallbackDescription: "Agent Talk is an open protocol for people's agents to talk beside their email.",
         withToc: true,
     },
-    {
-        source: "a2a-extension.md",
-        path: `${BASE_PATH}/v1/`,
-        fallbackDescription: "The Agent Talk extension for A2A.",
-        withToc: false,
-    },
 ];
 
 const FILE_FOLDERS: FileFolder[] = [
@@ -101,7 +95,6 @@ const FILE_FOLDERS: FileFolder[] = [
 const NAV_ITEMS: NavItem[] = [
     { label: "Website", href: WEBSITE_URL },
     { label: "Protocol", href: `${BASE_PATH}/` },
-    { label: "A2A extension", href: `${BASE_PATH}/v1/` },
     { label: "Schemas", href: `${BASE_PATH}/v1/schemas/` },
     { label: "Test vectors", href: `${BASE_PATH}/v1/vectors/` },
     { label: "GitHub", href: GITHUB_URL },

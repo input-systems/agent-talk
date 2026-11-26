@@ -8,7 +8,7 @@ import {
 } from "./agentTalkServiceToken.utils.js";
 
 const NOW = new Date("2026-11-25T12:00:00Z");
-const AUDIENCE = "https://api.input.so/a2a";
+const AUDIENCE = "https://api.input.so/agent-talk-service/steps";
 
 describe("service token", () => {
     it("checks the key, the audience and the lifetime", async () => {
@@ -22,7 +22,9 @@ describe("service token", () => {
         expect(check.isValid && check.kid).toBe("k1");
         expect(check.isValid && check.claims).toMatchObject({ iss: "peer.test", aud: AUDIENCE, jti: "j1" });
 
-        await expect(checkAgentTalkServiceToken({ token, audience: "https://other.test/a2a", now: NOW, getPublicKey })).resolves.toEqual({
+        await expect(
+            checkAgentTalkServiceToken({ token, audience: "https://other.test/agent-talk/steps", now: NOW, getPublicKey }),
+        ).resolves.toEqual({
             isValid: false,
             reason: AGENT_TALK_SERVICE_TOKEN_REJECT_REASON.WRONG_AUDIENCE,
         });

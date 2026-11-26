@@ -208,9 +208,13 @@ export const MINUTE_MS = 60 * 1000;
 export const HOUR_MS = 60 * MINUTE_MS;
 export const DAY_MS = 24 * HOUR_MS;
 
-// the agent talk profile extension of a2a (protocol 9), where its specification lives. the uri is the version: a breaking
-// change takes a new one
-export const AGENT_TALK_A2A_EXTENSION_URI = "https://talk.input.so/v1";
+// the version of a service's document (protocol 9.1): a change in meaning takes a new one
+export const AGENT_TALK_SERVICE_DOCUMENT_VERSION = 1;
 
-// the a2a protocol version this binding speaks, as the A2A-Version header and an interface's protocolVersion name it
-export const AGENT_TALK_A2A_VERSION = "1.0";
+// where a service publishes its document, on its issuer's domain
+export const AGENT_TALK_SERVICE_WELL_KNOWN_PATH = "/.well-known/agent-talk-service.json";
+
+// the carriers a service document may list. readers ignore a type they do not know, so a new one (an a2a binding) is additive
+export const AGENT_TALK_CARRIER_TYPE = {
+    HTTPS: "https",
+} as const;

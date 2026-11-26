@@ -2,8 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { AgentTalkPublicKeyResolver, AgentTalkSignedStep, AgentTalkUnsignedStep } from "../../src/agentTalk.types.js";
-import { signAgentTalkAgentCard, verifyAgentTalkAgentCard } from "../../src/agentTalkAgentCard.utils.js";
 import { formatAgentTalkStepBlock, readAgentTalkStepBlock } from "../../src/agentTalkBlock.utils.js";
+import { createAgentTalkDirectBody, getAgentTalkDirectOutcome, readAgentTalkDirectBody } from "../../src/agentTalkDirect.utils.js";
 import {
     formatAgentTalkHeader,
     formatAgentTalkLinkHeader,
@@ -12,6 +12,12 @@ import {
 } from "../../src/agentTalkHeader.utils.js";
 import { getCanonicalJson } from "../../src/agentTalkJson.utils.js";
 import { encodeJwsSegment, importAgentTalkPublicKeyJwk, importAgentTalkSigningKeyJwk, signJws } from "../../src/agentTalkJws.utils.js";
+import {
+    readAgentTalkServiceDocument,
+    signAgentTalkServiceDocument,
+    verifyAgentTalkServiceDocument,
+} from "../../src/agentTalkServiceDocument.utils.js";
+import type { AgentTalkServiceDocument } from "../../src/agentTalkServiceDocument.utils.js";
 import { checkAgentTalkServiceToken } from "../../src/agentTalkServiceToken.utils.js";
 import { signAgentTalkStep, verifyAgentTalkStep } from "../../src/agentTalkStep.utils.js";
 import { checkAgentTalkLinkToken, checkAgentTalkPresenceToken, checkAgentTalkToken } from "../../src/agentTalkToken.utils.js";
@@ -49,14 +55,19 @@ type BlockCase =
           receiverKeys: KeyReference[];
           expected: unknown;
       };
-type AgentCardCase =
+type ServiceDocumentCase =
     | {
           kind: "sign";
           signer: string;
-          card: Record<string, unknown>;
-          expected: { protectedHeader: Record<string, unknown>; canonicalPayload: string; signedCard: Record<string, unknown> };
+          document: AgentTalkServiceDocument;
+          expected: { protectedHeader: Record<string, unknown>; canonicalPayload: string; signedDocument: Record<string, unknown> };
       }
-    | { kind: "verify"; card: unknown; issuer: string; receiverKeys: KeyReference[]; expected: { isValid: boolean } };
+    | { kind: "verify"; document: unknown; issuer: string; receiverKeys: KeyReference[]; expected: { isValid: boolean } }
+    | { kind: "read"; document: unknown; expected: unknown };
+type DirectBodyCase =
+    | { kind: "create"; input: { step: AgentTalkSignedStep; door?: string }; expected: unknown }
+    | { kind: "read"; body: unknown; expected: unknown }
+    | { kind: "outcome"; status: number; body: unknown; expected: string };
 
 const VECTORS_DIRECTORY = import.meta.dirname;
 
@@ -260,22 +271,47 @@ describe("blocks.json", () => {
     });
 });
 
-describe("agent-cards.json", () => {
-    it.each(readVectors<AgentCardCase>("agent-cards.json").cases)("$name", async (vector) => {
+describe("service-documents.json", () => {
+    it.each(readVectors<ServiceDocumentCase>("service-documents.json").cases)("$name", async (vector) => {
         switch (vector.kind) {
             case "sign": {
-                const signed = await signAgentTalkAgentCard(vector.card, await getSigningKey(vector.signer));
+                const signed = await signAgentTalkServiceDocument(vector.document, await getSigningKey(vector.signer));
                 const [signature] = signed.signatures;
 
-                expect(getCanonicalJson(vector.card)).toBe(vector.expected.canonicalPayload);
+                expect(getCanonicalJson(vector.document)).toBe(vector.expected.canonicalPayload);
                 expect(decodeSegment(signature?.protected ?? "")).toEqual(vector.expected.protectedHeader);
-                expect(signed).toEqual(vector.expected.signedCard);
+                expect(signed).toEqual(vector.expected.signedDocument);
                 return;
             }
             case "verify":
-                await expect(verifyAgentTalkAgentCard(vector.card, vector.issuer, createResolver(vector.receiverKeys))).resolves.toBe(
-                    vector.expected.isValid,
+                await expect(
+                    verifyAgentTalkServiceDocument(vector.document, vector.issuer, createResolver(vector.receiverKeys)),
+                ).resolves.toBe(vector.expected.isValid);
+                return;
+            case "read":
+                expect(readAgentTalkServiceDocument(vector.document)).toEqual(vector.expected);
+                return;
+            default: {
+                const unknownKind: never = vector;
+                throw new Error(`unknown case ${JSON.stringify(unknownKind)}`);
+            }
+        }
+    });
+});
+
+describe("direct-bodies.json", () => {
+    it.each(readVectors<DirectBodyCase>("direct-bodies.json").cases)("$name", (vector) => {
+        switch (vector.kind) {
+            case "create":
+                expect(JSON.parse(JSON.stringify(createAgentTalkDirectBody(vector.input.step, vector.input.door)))).toEqual(
+                    vector.expected,
                 );
+                return;
+            case "read":
+                expect(readAgentTalkDirectBody(vector.body)).toEqual(vector.expected);
+                return;
+            case "outcome":
+                expect(getAgentTalkDirectOutcome(vector.status, vector.body)).toBe(vector.expected);
                 return;
             default: {
                 const unknownKind: never = vector;

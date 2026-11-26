@@ -1,0 +1,1311 @@
+{
+  "description": "The https carrier's request body (protocol 9.2) and responses (9.5). create: { step, door? } to the body. read: the parsed JSON body to { isValid: true, step, door } or { isValid: false, response: { status, body } }; a numeric v other than 1 is unsupported_version, anything else malformed is bad_request. A body over 64 KiB is refused before it is parsed, which these cases do not cover. outcome: a response's status and parsed body to taken (2xx), refused (403 not_accepted) or failed (anything else, retried).",
+  "version": 1,
+  "cases": [
+    {
+      "kind": "create",
+      "name": "create body",
+      "description": "The signed step whole.",
+      "input": {
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      },
+      "expected": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      }
+    },
+    {
+      "kind": "create",
+      "name": "create body without seq",
+      "description": "The host's seq is left out; the signature does not cover it.",
+      "input": {
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA",
+          "seq": 3
+        }
+      },
+      "expected": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      }
+    },
+    {
+      "kind": "create",
+      "name": "create body for a door",
+      "description": "A first ask to an open door names the door's id.",
+      "input": {
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "door_5Lr8"
+      },
+      "expected": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "door_5Lr8"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "valid",
+      "description": "A step and no door.",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      },
+      "expected": {
+        "isValid": true,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": null
+      }
+    },
+    {
+      "kind": "read",
+      "name": "valid with a door",
+      "description": "A step and the door it is for.",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "door_5Lr8"
+      },
+      "expected": {
+        "isValid": true,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "door_5Lr8"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "door of 128 characters",
+      "description": "The longest door id.",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "expected": {
+        "isValid": true,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "step still to be checked",
+      "description": "The body reader checks only the body's shape; the step is validated and verified after it, and a bad step gets the uniform refusal.",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_1"
+        }
+      },
+      "expected": {
+        "isValid": true,
+        "step": {
+          "id": "st_1"
+        },
+        "door": null
+      }
+    },
+    {
+      "kind": "read",
+      "name": "not an object",
+      "description": "A string.",
+      "body": "step",
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "array",
+      "description": "A JSON array.",
+      "body": [
+        {
+          "v": 1,
+          "step": {
+            "id": "st_ask",
+            "talk": "tk_dinner",
+            "at": "2026-11-21T10:00:00.000Z",
+            "by": {
+              "address": "ada@example.com",
+              "actor": "agent"
+            },
+            "email": "<ask-1@north.example>",
+            "text": "Ada's agent asks which evening works for dinner.",
+            "type": "ask",
+            "to": [
+              "ben@example.org"
+            ],
+            "question": "Which evening works for dinner?",
+            "context": [
+              "Both free after 7"
+            ],
+            "options": [
+              {
+                "id": "tue",
+                "label": "Tuesday · 7:30 PM",
+                "isRecommended": true,
+                "value": {
+                  "type": "time",
+                  "text": "Tue 24 Nov, 19:30–21:30",
+                  "start": "2026-11-24T19:30:00+01:00",
+                  "end": "2026-11-24T21:30:00+01:00",
+                  "timeZone": "Europe/Amsterdam"
+                }
+              },
+              {
+                "id": "thu",
+                "label": "Thursday · 8:00 PM"
+              }
+            ],
+            "can": {
+              "counter": true,
+              "decline": true,
+              "text": false
+            },
+            "answerBy": "personOrAgent",
+            "needs": [
+              "calendar.book"
+            ],
+            "effect": "event",
+            "autoUntil": "2026-11-21T11:00:00.000Z",
+            "expires": "2026-11-28T10:00:00.000Z",
+            "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+          }
+        }
+      ],
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "null",
+      "description": "JSON null.",
+      "body": null,
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "no v",
+      "description": "v is missing.",
+      "body": {
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "v as a string",
+      "description": "v is \"1\".",
+      "body": {
+        "v": "1",
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "another version",
+      "description": "v: 2. The receiver says which versions it speaks.",
+      "body": {
+        "v": 2,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        }
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "unsupported_version",
+            "versions": [
+              1
+            ]
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "no step",
+      "description": "step is missing.",
+      "body": {
+        "v": 1
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "step not an object",
+      "description": "step is a string.",
+      "body": {
+        "v": 1,
+        "step": "st_1"
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "door not a string",
+      "description": "door: 7.",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": 7
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "empty door",
+      "description": "door: \"\".",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": ""
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "read",
+      "name": "door too long",
+      "description": "A door id of 129 characters.",
+      "body": {
+        "v": 1,
+        "step": {
+          "id": "st_ask",
+          "talk": "tk_dinner",
+          "at": "2026-11-21T10:00:00.000Z",
+          "by": {
+            "address": "ada@example.com",
+            "actor": "agent"
+          },
+          "email": "<ask-1@north.example>",
+          "text": "Ada's agent asks which evening works for dinner.",
+          "type": "ask",
+          "to": [
+            "ben@example.org"
+          ],
+          "question": "Which evening works for dinner?",
+          "context": [
+            "Both free after 7"
+          ],
+          "options": [
+            {
+              "id": "tue",
+              "label": "Tuesday · 7:30 PM",
+              "isRecommended": true,
+              "value": {
+                "type": "time",
+                "text": "Tue 24 Nov, 19:30–21:30",
+                "start": "2026-11-24T19:30:00+01:00",
+                "end": "2026-11-24T21:30:00+01:00",
+                "timeZone": "Europe/Amsterdam"
+              }
+            },
+            {
+              "id": "thu",
+              "label": "Thursday · 8:00 PM"
+            }
+          ],
+          "can": {
+            "counter": true,
+            "decline": true,
+            "text": false
+          },
+          "answerBy": "personOrAgent",
+          "needs": [
+            "calendar.book"
+          ],
+          "effect": "event",
+          "autoUntil": "2026-11-21T11:00:00.000Z",
+          "expires": "2026-11-28T10:00:00.000Z",
+          "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+        },
+        "door": "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      },
+      "expected": {
+        "isValid": false,
+        "response": {
+          "status": 400,
+          "body": {
+            "error": "bad_request"
+          }
+        }
+      }
+    },
+    {
+      "kind": "outcome",
+      "name": "taken",
+      "description": "202 with an empty object.",
+      "status": 202,
+      "body": {},
+      "expected": "taken"
+    },
+    {
+      "kind": "outcome",
+      "name": "taken as any 2xx",
+      "description": "200.",
+      "status": 200,
+      "body": {},
+      "expected": "taken"
+    },
+    {
+      "kind": "outcome",
+      "name": "refused",
+      "description": "The uniform refusal.",
+      "status": 403,
+      "body": {
+        "error": "not_accepted"
+      },
+      "expected": "refused"
+    },
+    {
+      "kind": "outcome",
+      "name": "403 with another error",
+      "description": "Not the uniform refusal: failed, and retried.",
+      "status": 403,
+      "body": {
+        "error": "forbidden"
+      },
+      "expected": "failed"
+    },
+    {
+      "kind": "outcome",
+      "name": "bad request",
+      "description": "The body was not one.",
+      "status": 400,
+      "body": {
+        "error": "bad_request"
+      },
+      "expected": "failed"
+    },
+    {
+      "kind": "outcome",
+      "name": "unsupported version",
+      "description": "The receiver speaks another version.",
+      "status": 400,
+      "body": {
+        "error": "unsupported_version",
+        "versions": [
+          1
+        ]
+      },
+      "expected": "failed"
+    },
+    {
+      "kind": "outcome",
+      "name": "too large",
+      "description": "413 from a server's own body limit.",
+      "status": 413,
+      "body": null,
+      "expected": "failed"
+    },
+    {
+      "kind": "outcome",
+      "name": "server error",
+      "description": "503.",
+      "status": 503,
+      "body": null,
+      "expected": "failed"
+    }
+  ]
+}
