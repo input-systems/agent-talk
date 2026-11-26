@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "outDir": "dist",
+        "rootDir": "src",
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "types": []
+    },
+    "include": ["src/**/*"],
+    "exclude": ["src/**/*.test.ts", "src/agentTalk.fixtures.ts"]
+}
