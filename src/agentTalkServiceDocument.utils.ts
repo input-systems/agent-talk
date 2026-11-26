@@ -60,10 +60,19 @@ const getIsText = (value: unknown, max: number = DOCUMENT_LIMIT.TEXT): value is 
 const getIsHttpsUrl = (value: unknown): value is string =>
     getIsText(value, DOCUMENT_LIMIT.URL) && value.startsWith("https://") && URL.canParse(value);
 
-const readCarrier = (value: unknown): AgentTalkCarrier | null =>
-    getIsJsonObject(value) && getIsText(value.type, DOCUMENT_LIMIT.ID) && getIsHttpsUrl(value.url)
-        ? { type: value.type, url: value.url }
-        : null;
+const KNOWN_CARRIER_TYPES: readonly string[] = Object.values(AGENT_TALK_CARRIER_TYPE);
+
+// a carrier this version knows must be right, or the document is refused so its publisher hears of it. one it does not know is
+// kept when it has a type and a url, and otherwise dropped: a later carrier may use another kind of url, and must never make
+// an older reader refuse the carriers it does know
+const readCarrier = (value: unknown): AgentTalkCarrier | null | undefined => {
+    if (!getIsJsonObject(value) || !getIsText(value.type, DOCUMENT_LIMIT.ID)) return undefined;
+    if (!KNOWN_CARRIER_TYPES.includes(value.type)) {
+        return getIsText(value.url, DOCUMENT_LIMIT.URL) ? { type: value.type, url: value.url } : undefined;
+    }
+
+    return getIsHttpsUrl(value.url) ? { type: value.type, url: value.url } : null;
+};
 
 const readHandle = (value: unknown): AgentTalkDoorHandle | null =>
     getIsJsonObject(value) &&
@@ -90,8 +99,11 @@ export const readAgentTalkServiceDocument = (value: unknown): AgentTalkServiceDo
     if (!getIsText(issuer, DOCUMENT_LIMIT.ID) || !getIsText(name) || !getIsText(description) || !getIsHttpsUrl(keys)) return null;
     if (!getIsJsonObject(provider) || !getIsText(provider.organization) || !getIsHttpsUrl(provider.url)) return null;
     if (!Array.isArray(carriers) || carriers.length > DOCUMENT_LIMIT.CARRIERS) return null;
-    const readCarriers = carriers.map(readCarrier);
-    if (!readCarriers.every((carrier) => carrier !== null)) return null;
+    const readCarriers: AgentTalkCarrier[] = [];
+    for (const carrier of carriers.map(readCarrier)) {
+        if (carrier === null) return null;
+        if (carrier) readCarriers.push(carrier);
+    }
     if (doors !== undefined && !(getIsHttpsUrl(doors) && doors.includes(DOOR_TEMPLATE_VARIABLE))) return null;
     const door = readDoor(value.door);
     if (door === null) return null;

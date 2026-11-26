@@ -48,6 +48,12 @@ describe("agent talk service document", () => {
 
         expect(readAgentTalkServiceDocument(withA2a)).toMatchObject({ carriers: withA2a.carriers, door: { id: "door_1" } });
         expect(readAgentTalkServiceDocument(withA2a)).not.toHaveProperty("extra");
+        const withQueue = { ...document, carriers: [{ type: "queue", url: "sqs://eu-west-1/north" }, { type: "x" }, ...document.carriers] };
+        expect(readAgentTalkServiceDocument(withQueue)?.carriers).toEqual([
+            { type: "queue", url: "sqs://eu-west-1/north" },
+            ...document.carriers,
+        ]);
+        expect(readAgentTalkServiceDocument({ ...document, carriers: [{ type: "https", url: "http://north.test/steps" }] })).toBeNull();
         expect(readAgentTalkServiceDocument({ ...document, v: 2 })).toBeNull();
         expect(readAgentTalkServiceDocument({ ...document, keys: "http://north.test/keys.json" })).toBeNull();
         expect(readAgentTalkServiceDocument({ ...document, doors: "https://north.test/doors" })).toBeNull();

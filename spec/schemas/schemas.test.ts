@@ -697,6 +697,10 @@ describe("agent talk json schemas", () => {
             ["a door document", { ...document, door }],
             ["a service that speaks by email alone", { ...(without(document, "doors") as AgentTalkServiceDocument), carriers: [] }],
             ["an unknown carrier type", { ...document, carriers: [{ type: "a2a", url: "https://example.com/a2a" }, ...document.carriers] }],
+            [
+                "an unknown carrier with another kind of url",
+                { ...document, carriers: [{ type: "queue", url: "sqs://eu-west-1/north" }, ...document.carriers] },
+            ],
         ])("%s passes the code and the schema", async (_, unsigned) => {
             const signed = JSON.parse(JSON.stringify(await signAgentTalkServiceDocument(unsigned, key))) as JsonObject;
 
@@ -710,6 +714,7 @@ describe("agent talk json schemas", () => {
             ["keys over http", { ...document, keys: "http://input.so/keys.json" }],
             ["nine carriers", { ...document, carriers: Array.from({ length: 9 }, () => document.carriers[0]) }],
             ["a carrier without a url", { ...document, carriers: [{ type: "https" }] }],
+            ["an https carrier over http", { ...document, carriers: [{ type: "https", url: "http://example.com/agent-talk/steps" }] }],
             ["doors without the address variable", { ...document, doors: "https://example.com/agent-talk/doors" }],
             ["a handle without a description", { ...document, door: { ...door, handles: [{ id: "question", name: "Question" }] } }],
             ["eleven handles", { ...document, door: { ...door, handles: Array.from({ length: 11 }, () => door.handles[0]) } }],

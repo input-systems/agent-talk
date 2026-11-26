@@ -505,9 +505,9 @@ A service publishes a signed service document at `https://<issuer>/.well-known/a
 - `keys` names the service's JWK Set (section 3.4).
 - `carriers` lists the ways a step reaches the service directly, at most 8, each with a `type` of at most 128 characters and a `url`. An empty list means the service speaks by email alone.
 - `doors` is optional: a URI template (RFC 6570, level 1) with one variable, `address`, for the door document of one open-door address. A service without open doors leaves it out.
-- Every URL is `https://`, at most 2,048 characters.
+- Every URL this version defines, and the `url` of an `https` carrier, is `https://`. Every URL is at most 2,048 characters.
 
-**Carriers.** A reader MUST ignore a carrier whose `type` it does not know, and MUST ignore fields this version does not define. A service that lists no carrier the reader knows is, for that reader, a service that speaks by email alone. This is how a new carrier is added beside the others without anyone switching (section 9.7).
+**Carriers.** A reader MUST ignore a carrier whose `type` it does not know, whatever its fields hold: a later carrier may use another kind of URL. A reader MUST refuse a document whose `https` carrier is malformed, and MUST ignore fields this version does not define. A service that lists no carrier the reader knows is, for that reader, a service that speaks by email alone. This is how a new carrier is added beside the others without anyone switching (section 9.7).
 
 **Signing.** `signatures` holds one or more `{ "protected", "signature" }` entries. Each is a JWS (RFC 7515) whose protected header has `alg: "EdDSA"`, the `kid` of a key in the service's key set and `typ: "agent-talk-service"`, and whose payload is the document in JCS (RFC 8785) with `signatures` left out. `protected` and `signature` are base64url. The payload is not carried: a reader rebuilds the signing input as `<protected>.<base64url of the canonical document>`.
 

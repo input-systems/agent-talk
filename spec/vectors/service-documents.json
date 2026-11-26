@@ -944,6 +944,82 @@
     },
     {
       "kind": "read",
+      "name": "unknown carrier with another kind of url",
+      "description": "A carrier type the reader does not know may use any url; it is kept, and one without a url is dropped.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "queue",
+            "url": "sqs://eu-west-1/north"
+          },
+          {
+            "type": "x-relay"
+          },
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "queue",
+            "url": "sqs://eu-west-1/north"
+          },
+          {
+            "type": "https",
+            "url": "https://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      }
+    },
+    {
+      "kind": "read",
+      "name": "https carrier without an https url",
+      "description": "A carrier this version knows must be right, or the document does not read.",
+      "document": {
+        "v": 1,
+        "issuer": "north.example",
+        "name": "North",
+        "description": "North's agent talk service.",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "keys": "https://north.example/.well-known/agent-talk-keys.json",
+        "carriers": [
+          {
+            "type": "https",
+            "url": "http://north.example/agent-talk/steps"
+          }
+        ],
+        "doors": "https://north.example/agent-talk/doors/{address}"
+      },
+      "expected": null
+    },
+    {
+      "kind": "read",
       "name": "email alone",
       "description": "No carriers: the service speaks by email alone.",
       "document": {

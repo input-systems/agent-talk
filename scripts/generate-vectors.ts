@@ -1535,6 +1535,19 @@ const documentReadInputs: { name: string; description: string; document: unknown
         description: "A carrier type the reader does not know is kept; a field this version does not define is left out.",
         document: signedNorthFutureDocument,
     },
+    {
+        name: "unknown carrier with another kind of url",
+        description: "A carrier type the reader does not know may use any url; it is kept, and one without a url is dropped.",
+        document: {
+            ...northDocument,
+            carriers: [{ type: "queue", url: "sqs://eu-west-1/north" }, { type: "x-relay" }, ...northDocument.carriers],
+        },
+    },
+    {
+        name: "https carrier without an https url",
+        description: "A carrier this version knows must be right, or the document does not read.",
+        document: { ...northDocument, carriers: [{ type: "https", url: "http://north.example/agent-talk/steps" }] },
+    },
     { name: "email alone", description: "No carriers: the service speaks by email alone.", document: { ...northDocument, carriers: [] } },
     { name: "another version", description: "v: 2.", document: { ...northDocument, v: 2 } },
     { name: "no carriers list", description: "carriers is missing.", document: { ...northDocument, carriers: undefined } },

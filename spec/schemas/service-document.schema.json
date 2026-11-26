@@ -51,8 +51,10 @@
             "required": ["type", "url"],
             "properties": {
                 "type": { "$ref": "#/$defs/token" },
-                "url": { "$ref": "#/$defs/httpsUrl" }
-            }
+                "url": { "type": "string", "minLength": 1, "maxLength": 2048 }
+            },
+            "if": { "properties": { "type": { "const": "https" } } },
+            "then": { "properties": { "url": { "$ref": "#/$defs/httpsUrl" } } }
         },
         "door": {
             "description": "An open door's own part of its document: the opaque id a first ask names to reach it, its address, and what it handles.",
