@@ -529,11 +529,14 @@ const validateEnvelope = (step: JsonObject, check: Issues, stage: StepStage) => 
     check.type(step.type, `${path}.type`, getIsKnownStepType);
 };
 
-// checked first, so nothing below walks a step that is too large, or nested too deep to have a canonical form
+const textEncoder = new TextEncoder();
+
+// checked first, so nothing below walks a step that is too large, or nested too deep to have a canonical form. bytes, not
+// characters, since the direct carrier caps its body in bytes
 const getSizeIssue = (step: JsonObject): AgentTalkValidationIssue | null => {
     try {
-        return getCanonicalJson(step).length > AGENT_TALK_LIMIT.STEP
-            ? { path: "step", message: `must be at most ${AGENT_TALK_LIMIT.STEP} characters as json` }
+        return textEncoder.encode(getCanonicalJson(step)).length > AGENT_TALK_LIMIT.STEP
+            ? { path: "step", message: `must be at most ${AGENT_TALK_LIMIT.STEP} bytes as json` }
             : null;
     } catch {
         return { path: "step", message: "must be plain json" };

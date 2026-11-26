@@ -155,8 +155,9 @@ export const AGENT_TALK_INTRODUCTION_REQUEST_TYPE = "IntroductionRequest";
 export const AGENT_TALK_LIMIT = {
     TALK_TITLE: 60,
     TALK_PARTIES: 2,
-    // a whole step as json, whatever it holds
-    STEP: 256_000,
+    // a whole step as canonical json in utf-8 bytes, whatever it holds. with the direct body's wrapper and the longest door it
+    // stays under the direct body's 64 KiB, so every valid step can travel directly
+    STEP: 64_000,
     STEP_TEXT: 2_000,
     // step and talk ids; option and field ids are shorter
     ID: 128,

@@ -456,9 +456,10 @@ describe("agent talk json schemas", () => {
             });
         });
 
-        it("rejects an about over 8000 characters and a step over 256000 characters as json", () => {
+        it("rejects an about over 8000 characters and a step over 64000 bytes as json", () => {
             expectOnlyCodeRejects({ ...getSigned("say"), about: { "@type": "Order", description: "d".repeat(8_000) } });
-            expectOnlyCodeRejects({ ...getSigned("private step type"), padding: "p".repeat(256_000) });
+            expectOnlyCodeRejects({ ...getSigned("private step type"), padding: "p".repeat(64_000) });
+            expectOnlyCodeRejects({ ...getSigned("private step type"), padding: "é".repeat(32_000) });
         });
 
         it("rejects a step nested deeper than 64 levels", () => {

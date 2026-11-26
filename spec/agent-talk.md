@@ -182,8 +182,8 @@ type Step = {
 - `email` is a Message-ID in angle brackets, at most 998 characters. `sig` is at most 1,024 characters.
 - Every time is RFC 3339 with an offset, on a day that exists, with every field in range: `2026-99-99T99:99:99Z`, `2026-02-30T10:00:00Z` and `24:00:00` have the right shape and MUST be rejected. Leap seconds are not accepted. A date is `YYYY-MM-DD` on a day that exists.
 - Every string a step defines is non-empty.
-- A step is at most 256,000 characters as JSON, whatever fields it holds, and nests at most 64 levels below its top-level object.
-- Every length in this document counts UTF-16 code units, the way JSON text is commonly measured, so implementations in any language agree on the limits.
+- A step is at most 64,000 bytes as canonical JSON (RFC 8785) in UTF-8, whatever fields it holds, so every valid step fits a direct body (9.2). It nests at most 64 levels below its top-level object.
+- Every other length in this document counts UTF-16 code units, the way JSON text is commonly measured, so implementations in any language agree on the limits.
 
 An author MUST use the types this version defines, or private ones. A receiver MUST also accept a type it does not know that is a valid name, and show the step or value by its `text`.
 
@@ -553,7 +553,7 @@ Authorization: Bearer <service token>
 - `v` is the version of the body, `1`.
 - `step` is the step whole, as its author's service signed it: with `sig`, and without `seq`, which only the host assigns.
 - `door` is present only on a first ask to an open door: the door's `id` from its door document (9.1), 1 to 128 characters.
-- The body is at most 64 KiB. A receiver refuses a larger body before it parses it. A step that does not fit travels by email only.
+- The body is at most 64 KiB. A receiver refuses a larger body before it parses it. Every valid step fits: a step is at most 64,000 bytes (4.2), which leaves room for `v` and the longest `door`.
 - `Authorization` carries the service token (9.4).
 
 Each request carries one step and nothing else: no method name, no session and no task. The steps themselves say how they relate (`talk`, `re`). Each service is server and client: a step always travels from its author's service to the other side's carrier, and an answer goes from the answerer's service to the asker's the same way an ask went the other way.

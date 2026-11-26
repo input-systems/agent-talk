@@ -23,7 +23,7 @@ Times use `format: "date-time"` next to the code's pattern. Use a validator that
 
 ## Checks only code can do
 
-- A step at most 256,000 characters as canonical JSON (RFC 8785), nested at most 64 levels deep.
+- A step at most 64,000 bytes as canonical JSON (RFC 8785) in UTF-8, nested at most 64 levels deep.
 - `about` at most 8,000 characters as canonical JSON.
 - An ask's `expires` after `at` and within 30 days of it; `autoUntil` after `at`, within 24 hours of it, and not after `expires`.
 - A time value's `end` after its `start`.
