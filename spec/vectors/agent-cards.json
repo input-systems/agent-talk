@@ -1,0 +1,779 @@
+{
+  "description": "Signed A2A Agent Cards (protocol 9.1). sign: sign card with signer's key and compare the signed card. verify: whether any of the card's signatures checks out against a key the receiver holds for issuer.",
+  "version": 1,
+  "cases": [
+    {
+      "kind": "sign",
+      "name": "sign service card",
+      "description": "north.example's service card. The signature is a JWS over the card in JCS with signatures left out; protected is the base64url protected header, and the payload is not carried.",
+      "signer": "north.example",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": []
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11",
+          "typ": "JOSE"
+        },
+        "canonicalPayload": "{\"capabilities\":{\"extensions\":[{\"description\":\"Agent talk: signed steps between people's agents, the same steps email carries.\",\"params\":{\"addressCard\":\"https://north.example/.well-known/agent-talk/address-card\",\"keys\":\"https://north.example/.well-known/agent-talk-keys.json\"},\"required\":true,\"uri\":\"https://input.so/agent-talk/v1\"}],\"pushNotifications\":false,\"streaming\":false},\"defaultInputModes\":[\"application/agent-talk+json\",\"text/plain\"],\"defaultOutputModes\":[\"application/agent-talk+json\",\"text/plain\"],\"description\":\"North's agent talk service.\",\"name\":\"North\",\"provider\":{\"organization\":\"North Example\",\"url\":\"https://north.example\"},\"securityRequirements\":[{\"schemes\":{\"agentTalkServiceToken\":{}}}],\"securitySchemes\":{\"agentTalkServiceToken\":{\"httpAuthSecurityScheme\":{\"bearerFormat\":\"JWT\",\"description\":\"An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti.\",\"scheme\":\"Bearer\"}}},\"skills\":[],\"supportedInterfaces\":[{\"protocolBinding\":\"JSONRPC\",\"protocolVersion\":\"1.0\",\"url\":\"https://north.example/a2a\"}],\"version\":\"1.0.0\"}",
+        "signedCard": {
+          "name": "North",
+          "description": "North's agent talk service.",
+          "version": "1.0.0",
+          "provider": {
+            "organization": "North Example",
+            "url": "https://north.example"
+          },
+          "supportedInterfaces": [
+            {
+              "url": "https://north.example/a2a",
+              "protocolBinding": "JSONRPC",
+              "protocolVersion": "1.0"
+            }
+          ],
+          "capabilities": {
+            "streaming": false,
+            "pushNotifications": false,
+            "extensions": [
+              {
+                "uri": "https://input.so/agent-talk/v1",
+                "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+                "required": true,
+                "params": {
+                  "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                  "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+                }
+              }
+            ]
+          },
+          "securitySchemes": {
+            "agentTalkServiceToken": {
+              "httpAuthSecurityScheme": {
+                "scheme": "Bearer",
+                "bearerFormat": "JWT",
+                "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+              }
+            }
+          },
+          "securityRequirements": [
+            {
+              "schemes": {
+                "agentTalkServiceToken": {}
+              }
+            }
+          ],
+          "defaultInputModes": [
+            "application/agent-talk+json",
+            "text/plain"
+          ],
+          "defaultOutputModes": [
+            "application/agent-talk+json",
+            "text/plain"
+          ],
+          "skills": [],
+          "signatures": [
+            {
+              "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+              "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "valid",
+      "description": "north.example's signed service card.",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": [],
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "valid with keys in another order",
+      "description": "The payload is the card in JCS without signatures.",
+      "card": {
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+          }
+        ],
+        "skills": [],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "version": "1.0.0",
+        "description": "North's agent talk service.",
+        "name": "North"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "changed field",
+      "description": "name changed after signing.",
+      "card": {
+        "name": "Not North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": [],
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "other issuer",
+      "description": "north.example's card checked as south.example's.",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": [],
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+          }
+        ]
+      },
+      "issuer": "south.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "no signatures",
+      "description": "The unsigned card.",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": []
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "empty signatures",
+      "description": "signatures: [].",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": [],
+        "signatures": []
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "wrong key",
+      "description": "Signed with rogue.example's private key under north.example's kid.",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": [],
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "rOgnslQ1UcUu3oro_SOQ01W00q9vHoXeapoXFdtAytI7jP32kZR54Yu6_M6_atpWbz16CD04tKJsPsMpSeBjBg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "a valid signature after a bad one",
+      "description": "Any one signature by a key the receiver holds for the issuer is enough.",
+      "card": {
+        "name": "North",
+        "description": "North's agent talk service.",
+        "version": "1.0.0",
+        "provider": {
+          "organization": "North Example",
+          "url": "https://north.example"
+        },
+        "supportedInterfaces": [
+          {
+            "url": "https://north.example/a2a",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+          }
+        ],
+        "capabilities": {
+          "streaming": false,
+          "pushNotifications": false,
+          "extensions": [
+            {
+              "uri": "https://input.so/agent-talk/v1",
+              "description": "Agent talk: signed steps between people's agents, the same steps email carries.",
+              "required": true,
+              "params": {
+                "keys": "https://north.example/.well-known/agent-talk-keys.json",
+                "addressCard": "https://north.example/.well-known/agent-talk/address-card"
+              }
+            }
+          ]
+        },
+        "securitySchemes": {
+          "agentTalkServiceToken": {
+            "httpAuthSecurityScheme": {
+              "scheme": "Bearer",
+              "bearerFormat": "JWT",
+              "description": "An EdDSA JWT signed with the calling service's agent talk key: iss, aud (this endpoint), iat, exp (5 min), jti."
+            }
+          }
+        },
+        "securityRequirements": [
+          {
+            "schemes": {
+              "agentTalkServiceToken": {}
+            }
+          }
+        ],
+        "defaultInputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "defaultOutputModes": [
+          "application/agent-talk+json",
+          "text/plain"
+        ],
+        "skills": [],
+        "signatures": [
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "rOgnslQ1UcUu3oro_SOQ01W00q9vHoXeapoXFdtAytI7jP32kZR54Yu6_M6_atpWbz16CD04tKJsPsMpSeBjBg"
+          },
+          {
+            "protected": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJKT1NFIn0",
+            "signature": "q1XAAZXICsK3G3X92wZ0wdQttQQyDqEGMt_ZAc2qnOAJ3ZI42hGf9hfzfkmQn9X2bRX0lZwMN38F7tNknpKZBg"
+          }
+        ]
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{title}}</title>
+        <meta name="description" content="{{description}}" />
+        <meta name="robots" content="{{robots}}" />
+        <meta name="color-scheme" content="light dark" />
+        <link rel="canonical" href="{{canonical}}" />
+        <meta property="og:type" content="{{ogType}}" />
+        <meta property="og:site_name" content="{{siteName}}" />
+        <meta property="og:title" content="{{title}}" />
+        <meta property="og:description" content="{{description}}" />
+        <meta property="og:url" content="{{canonical}}" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="{{title}}" />
+        <meta name="twitter:description" content="{{description}}" />
+        <link rel="stylesheet" href="{{stylesheet}}" />
+        {{jsonLd}}
+    </head>
+    <body>
+        <a class="skip" href="#content">Skip to content</a>
+        <header class="site-header">
+            <div class="site-header-inner">
+                <a class="wordmark" href="{{home}}">Agent Talk</a>
+                <nav class="site-nav" aria-label="Site">{{nav}}</nav>
+                <a class="by" href="{{inputUrl}}">by Input</a>
+            </div>
+        </header>
+        <main id="content">
+            {{toc}}
+            <article>{{content}}</article>
+        </main>
+        <footer class="site-footer">
+            <p>Agent Talk is an open protocol made by <a href="{{inputUrl}}">Input</a>.</p>
+        </footer>
+    </body>
+</html>

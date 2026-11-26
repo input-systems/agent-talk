@@ -14,5 +14,5 @@
         "noEmit": true,
         "types": ["node"]
     },
-    "include": ["src/**/*", "scripts/**/*", "site/**/*", "vitest.config.ts", "oxlint.config.ts"]
+    "include": ["src/**/*", "spec/**/*", "scripts/**/*", "site/**/*", "vitest.config.ts", "oxlint.config.ts"]
 }

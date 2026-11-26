@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://input.so/agent-talk/v1/schemas/talk-token-claims.schema.json",
+    "title": "Agent Talk talk token claims",
+    "description": "The payload of the talk token: a compact JWS in the header, the block or the link of an email that opens or voices a step. It names a talk and a step and grants nothing.",
+    "$comment": "Protected header: { \"alg\": \"EdDSA\", \"kid\": <key id in the issuer's keys>, \"typ\": \"agent-talk-talk\" } (see $defs/protectedHeader). Checks only code can do: the signature against a key of iss; sub equal to the message's From (not for a token read from a link); iat at most 5 minutes ahead of the receiver's clock; exp, the ask's expires, at most 30 days after iat; now before exp. The reference implementation's own claim check only checks that iss, talk, step and sub are strings and v a number (then v must be 1).",
+    "type": "object",
+    "required": ["v", "iss", "talk", "step", "sub", "iat", "exp"],
+    "properties": {
+        "v": { "const": 1 },
+        "iss": { "$ref": "common.schema.json#/$defs/issuer" },
+        "talk": { "$ref": "common.schema.json#/$defs/id" },
+        "step": { "$ref": "common.schema.json#/$defs/id" },
+        "sub": { "$ref": "common.schema.json#/$defs/address" },
+        "iat": { "$ref": "common.schema.json#/$defs/numericDate" },
+        "exp": { "$ref": "common.schema.json#/$defs/numericDate" }
+    },
+    "$defs": {
+        "protectedHeader": {
+            "type": "object",
+            "required": ["alg", "kid", "typ"],
+            "properties": {
+                "alg": { "const": "EdDSA" },
+                "kid": { "type": "string" },
+                "typ": { "const": "agent-talk-talk" }
+            }
+        }
+    }
+}

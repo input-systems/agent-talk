@@ -1,0 +1,81 @@
+{
+  "description": "The Ed25519 keys behind every vector, as JWKs. TEST ONLY: the private keys are published so anyone can reproduce the signatures; never use them for anything else. A receiver in these vectors holds the keys listed in each case's receiverKeys, by iss and kid.",
+  "version": 1,
+  "cases": [
+    {
+      "name": "north.example",
+      "description": "A service the receiver in these vectors recognises and already holds the keys of.",
+      "issuer": "north.example",
+      "isRecognised": true,
+      "publicJwks": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "alg": "EdDSA",
+            "use": "sig",
+            "kid": "north-2026-11",
+            "x": "A9SDUPIbdQ9d_dzSDEgUzvdg1hj_k-W95kYvz5FKcQw"
+          }
+        ]
+      },
+      "testOnlyPrivateJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "north-2026-11",
+        "x": "A9SDUPIbdQ9d_dzSDEgUzvdg1hj_k-W95kYvz5FKcQw",
+        "d": "PMIr3VsVD7vmyo0U2Odk5wCv9khh5nHviXHnOosl0y4"
+      }
+    },
+    {
+      "name": "south.example",
+      "description": "A service the receiver in these vectors recognises and already holds the keys of.",
+      "issuer": "south.example",
+      "isRecognised": true,
+      "publicJwks": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "alg": "EdDSA",
+            "use": "sig",
+            "kid": "south-2026-11",
+            "x": "LZnbF0eBLPRpXmbKkcVBjpojn72eagPWZA4ImakADog"
+          }
+        ]
+      },
+      "testOnlyPrivateJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "south-2026-11",
+        "x": "LZnbF0eBLPRpXmbKkcVBjpojn72eagPWZA4ImakADog",
+        "d": "GZOV_SGrwUFf-C19V71LJSBtwxRzlSZ96dfJyTTlgvM"
+      }
+    },
+    {
+      "name": "rogue.example",
+      "description": "A service no receiver in these vectors recognises. Its keys are here so the signatures it makes can be reproduced; receivers never hold them.",
+      "issuer": "rogue.example",
+      "isRecognised": false,
+      "publicJwks": {
+        "keys": [
+          {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "alg": "EdDSA",
+            "use": "sig",
+            "kid": "rogue-2026-11",
+            "x": "6AJEemK5cjZCEFJk0sH2G00Yr2XVoz2spf464Y1w-5M"
+          }
+        ]
+      },
+      "testOnlyPrivateJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "rogue-2026-11",
+        "x": "6AJEemK5cjZCEFJk0sH2G00Yr2XVoz2spf464Y1w-5M",
+        "d": "hrhoxSYCV9US6GIz5vBeLYGznTTwSehPKw5EElceLcM"
+      }
+    }
+  ]
+}

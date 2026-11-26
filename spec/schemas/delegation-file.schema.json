@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://input.so/agent-talk/v1/schemas/delegation-file.schema.json",
+    "title": "Agent Talk delegation file",
+    "description": "/.well-known/agent-talk.json: a domain that cannot edit DNS names the services that may speak for its addresses. One malformed entry makes the whole file not count.",
+    "$comment": "The reference implementation trims and lowercases svc and each local part before matching them, so it also accepts \" Input.so \"; this schema describes the canonical form. A domain that can edit DNS publishes the same record as TXT at _agent-talk.<domain>: v=1; svc=…; acct=…; local=a,b.",
+    "type": "object",
+    "required": ["v", "services"],
+    "properties": {
+        "v": { "const": 1 },
+        "services": {
+            "type": "array",
+            "maxItems": 16,
+            "items": { "$ref": "#/$defs/record" }
+        }
+    },
+    "$defs": {
+        "record": {
+            "type": "object",
+            "required": ["svc"],
+            "properties": {
+                "svc": { "description": "The service's issuer domain.", "$ref": "common.schema.json#/$defs/issuer" },
+                "acct": {
+                    "description": "The hosted account, when the service hosts many companies.",
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{1,128}$"
+                },
+                "local": {
+                    "description": "The local parts the service covers; absent means every address at the domain.",
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "items": { "type": "string", "pattern": "^[a-z0-9!#$%&'*+/=?^_`{|}~.-]{1,64}$" }
+                }
+            }
+        }
+    }
+}

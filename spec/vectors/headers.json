@@ -1,0 +1,180 @@
+{
+  "description": "The X-Agent-Talk header (protocol 8.1) and the X-Agent-Talk-Link header (8.5). format: input to header value; t is left out when the value would pass 870 characters. parse: header value to { v, presence?, talk? }, or null.",
+  "version": 1,
+  "cases": [
+    {
+      "kind": "format",
+      "name": "format presence only",
+      "description": "Plain mail carries only the presence token.",
+      "input": {
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg"
+      },
+      "expected": {
+        "value": "v=1; p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+        "length": 366
+      }
+    },
+    {
+      "kind": "format",
+      "name": "format presence and talk",
+      "description": "A message that voices a step adds t.",
+      "input": {
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+        "talk": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+      },
+      "expected": {
+        "value": "v=1; p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg; t=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+        "length": 703
+      }
+    },
+    {
+      "kind": "format",
+      "name": "format drops t past 870 characters",
+      "description": "With an 80-character address the value would pass 870 characters, so t is left out; the block and the link still carry it.",
+      "input": {
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFAZXhhbXBsZS5jb20iLCJ0eXBlcyI6WyJ0aW1lIiwiYnVzeSIsInRleHQiXSwidiI6MX0.b-BjQff4tYY7fNMYGfftoDXBGsKJIjupJ_Vg6gh_FoNItytyiuxm3xS7QfmBvQuRL0RJKIsNmEy3IP-tkhmmAQ",
+        "talk": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+      },
+      "expected": {
+        "value": "v=1; p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFAZXhhbXBsZS5jb20iLCJ0eXBlcyI6WyJ0aW1lIiwiYnVzeSIsInRleHQiXSwidiI6MX0.b-BjQff4tYY7fNMYGfftoDXBGsKJIjupJ_Vg6gh_FoNItytyiuxm3xS7QfmBvQuRL0RJKIsNmEy3IP-tkhmmAQ; t=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+        "length": 790
+      }
+    },
+    {
+      "kind": "format",
+      "name": "format talk only",
+      "description": "No presence token (the person turned it off).",
+      "input": {
+        "talk": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+      },
+      "expected": {
+        "value": "v=1; t=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+        "length": 340
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse presence and talk",
+      "description": "The usual header.",
+      "input": "v=1; p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg; t=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+      "expected": {
+        "v": 1,
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+        "talk": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse folded",
+      "description": "Folding whitespace (CRLF and spaces) anywhere is removed before parsing.",
+      "input": "v=1;\r\n p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIw\r\n MjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg;\r\n\tt=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+      "expected": {
+        "v": 1,
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+        "talk": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse unknown parameters and case",
+      "description": "Unknown parameters are ignored and names are case-insensitive.",
+      "input": "V=1; X=abc; P=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "expected": {
+        "v": 1,
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg"
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse later version",
+      "description": "A higher integer v parses; whether to act on it is the caller's.",
+      "input": "v=2; p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "expected": {
+        "v": 2,
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg"
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse drops a token that is not a compact jws",
+      "description": "t with two segments is dropped.",
+      "input": "v=1; p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg; t=abc.def",
+      "expected": {
+        "v": 1,
+        "presence": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg"
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse empty token",
+      "description": "An empty p is dropped.",
+      "input": "v=1; p=",
+      "expected": {
+        "v": 1
+      }
+    },
+    {
+      "kind": "parse",
+      "name": "parse missing v",
+      "description": "No v: not an agent talk header.",
+      "input": "p=eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "expected": null
+    },
+    {
+      "kind": "parse",
+      "name": "parse v zero",
+      "description": "v must be an integer of at least 1.",
+      "input": "v=0",
+      "expected": null
+    },
+    {
+      "kind": "parse",
+      "name": "parse v not a number",
+      "description": "v must be an integer.",
+      "input": "v=one",
+      "expected": null
+    },
+    {
+      "kind": "parse",
+      "name": "parse v fraction",
+      "description": "v must be an integer.",
+      "input": "v=1.5",
+      "expected": null
+    },
+    {
+      "kind": "formatLink",
+      "name": "format link",
+      "description": "The X-Agent-Talk-Link value.",
+      "input": "https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+      "expected": "<https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA>"
+    },
+    {
+      "kind": "parseLink",
+      "name": "parse link",
+      "description": "An https URL in angle brackets.",
+      "input": "<https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA>",
+      "expected": "https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+    },
+    {
+      "kind": "parseLink",
+      "name": "parse link with spaces",
+      "description": "Surrounding whitespace is allowed.",
+      "input": "  <https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA>  ",
+      "expected": "https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA"
+    },
+    {
+      "kind": "parseLink",
+      "name": "parse link not https",
+      "description": "Only https counts.",
+      "input": "<http://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA>",
+      "expected": null
+    },
+    {
+      "kind": "parseLink",
+      "name": "parse link without brackets",
+      "description": "The brackets are required.",
+      "input": "https://north.example/t/eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+      "expected": null
+    }
+  ]
+}

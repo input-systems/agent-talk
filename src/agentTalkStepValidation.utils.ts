@@ -56,8 +56,37 @@ const SCOPE_PATTERN = /^[a-z][A-Za-z0-9-]*(\.[A-Za-z0-9-]+)*$/;
 const ADDRESS_PATTERN = /^[^\s@<>()[\]\\,;:"`]+@[a-z0-9.-]+\.[a-z0-9-]+$/;
 // a Message-ID as mail headers write it (RFC 5322 msg-id): one id in angle brackets, no spaces or markup inside
 const MESSAGE_ID_PATTERN = /^<[^\s<>@"]+@[^\s<>@"]+>$/;
-const RFC3339_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const RFC3339_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d+)?(Z|[+-](\d{2}):(\d{2}))$/;
+const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+// a day that exists: Date.parse rolls 2026-02-30 over to 2 March instead of refusing it
+const getIsRealDay = (year: string, month: string, day: string): boolean => {
+    const date = new Date(0);
+    date.setUTCFullYear(Number(year), Number(month) - 1, Number(day));
+
+    return date.getUTCFullYear() === Number(year) && date.getUTCMonth() === Number(month) - 1 && date.getUTCDate() === Number(day);
+};
+
+// an rfc 3339 time on a day that exists, with an hour, minute, second and offset in range. no leap seconds
+const getIsRealTime = (value: string): boolean => {
+    const match = RFC3339_PATTERN.exec(value);
+    if (!match) return false;
+    const [, year = "", month = "", day = "", hour = "", minute = "", second = "", , , offsetHour = "0", offsetMinute = "0"] = match;
+
+    return (
+        getIsRealDay(year, month, day) &&
+        Number(hour) <= 23 &&
+        Number(minute) <= 59 &&
+        Number(second) <= 59 &&
+        Number(offsetHour) <= 23 &&
+        Number(offsetMinute) <= 59
+    );
+};
+
+const getIsRealDate = (value: string): boolean => {
+    const match = DATE_PATTERN.exec(value);
+    return match !== null && getIsRealDay(match[1] ?? "", match[2] ?? "", match[3] ?? "");
+};
 const CURRENCY_PATTERN = /^[A-Z]{3}$/;
 const DECIMAL_PATTERN = /^-?\d+(\.\d+)?$/;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
@@ -112,7 +141,7 @@ const createIssues = (stage: StepStage) => {
     const time = (record: JsonObject, key: string, path: string, isOptional = false) => {
         const value = record[key];
         if (value === undefined && isOptional) return;
-        if (typeof value !== "string" || !RFC3339_PATTERN.test(value) || !Number.isFinite(Date.parse(value))) {
+        if (typeof value !== "string" || !getIsRealTime(value)) {
             add(`${path}.${key}`, "must be an RFC 3339 time");
         }
     };
@@ -201,7 +230,7 @@ const validateValue = (value: unknown, path: string, check: Issues) => {
             return;
         }
         case AGENT_TALK_VALUE_TYPE.DATE:
-            check.pattern(value, "date", path, DATE_PATTERN, "a YYYY-MM-DD date");
+            if (typeof value.date !== "string" || !getIsRealDate(value.date)) check.add(`${path}.date`, "must be a YYYY-MM-DD date");
             return;
         case AGENT_TALK_VALUE_TYPE.PLACE:
             check.text(value, "name", path, AGENT_TALK_LIMIT.VALUE_TEXT);

@@ -1,0 +1,102 @@
+{
+  "description": "JSON canonicalisation (JCS, RFC 8785) as the signatures use it. Parse inputJson, canonicalise, compare with expected.canonical byte for byte; expected.error means canonicalisation must fail.",
+  "version": 1,
+  "cases": [
+    {
+      "name": "key order",
+      "description": "Object keys sorted, whitespace removed.",
+      "inputJson": "{ \"b\": 2, \"a\": 1, \"c\": { \"z\": true, \"y\": null } }",
+      "expected": {
+        "canonical": "{\"a\":1,\"b\":2,\"c\":{\"y\":null,\"z\":true}}"
+      }
+    },
+    {
+      "name": "keys sort by utf-16 code units",
+      "description": "Sorting is by UTF-16 code units, not code points: U+1F600 (surrogates D83D DE00) sorts before U+FB01, and capitals before lowercase.",
+      "inputJson": "{ \"\\ufb01\": 1, \"\\ud83d\\ude00\": 2, \"a\": 3, \"B\": 4, \"\\u00e9\": 5, \"\": 6 }",
+      "expected": {
+        "canonical": "{\"\":6,\"B\":4,\"a\":3,\"é\":5,\"😀\":2,\"ﬁ\":1}"
+      }
+    },
+    {
+      "name": "arrays keep their order",
+      "description": "Only object keys are sorted.",
+      "inputJson": "[3, 1, 2, { \"b\": [ \"y\", \"x\" ], \"a\": [] }]",
+      "expected": {
+        "canonical": "[3,1,2,{\"a\":[],\"b\":[\"y\",\"x\"]}]"
+      }
+    },
+    {
+      "name": "numbers",
+      "description": "Numbers print in their shortest ECMAScript form. 9007199254740993 is past double precision and parses as 9007199254740992 (I-JSON keeps integers within 2^53).",
+      "inputJson": "[1.0, -0, 1e3, 1E-7, 0.000001, 1e21, 100000000000000000000, 123456789012345680000, 0.1, 3.14159, -1.5e-10, 9007199254740993]",
+      "expected": {
+        "canonical": "[1,0,1000,1e-7,0.000001,1e+21,100000000000000000000,123456789012345680000,0.1,3.14159,-1.5e-10,9007199254740992]"
+      }
+    },
+    {
+      "name": "string escapes",
+      "description": "Only the quote, the backslash and control characters are escaped; \\b \\f \\n \\r \\t use their short forms, other controls below U+0020 \\u00xx in lowercase. The slash and U+007F stay literal.",
+      "inputJson": "\"quote \\\" backslash \\\\ slash \\/ controls \\b\\f\\n\\r\\t\\u0000\\u001f\\u007f\"",
+      "expected": {
+        "canonical": "\"quote \\\" backslash \\\\ slash / controls \\b\\f\\n\\r\\t\\u0000\\u001f\""
+      }
+    },
+    {
+      "name": "unicode stays literal",
+      "description": "Non-ASCII characters, U+2028 and U+2029 are written as themselves, not escaped.",
+      "inputJson": "{ \"text\": \"Caf\\u00e9 \\u20ac \\ud83c\\udf77 \\u2028 \\u2029\" }",
+      "expected": {
+        "canonical": "{\"text\":\"Café € 🍷    \"}"
+      }
+    },
+    {
+      "name": "markup stays literal",
+      "description": "JCS leaves < > & alone. Only a step block escapes them (see blocks.json), after canonicalisation.",
+      "inputJson": "{ \"text\": \"</script><!-- R&D -->\" }",
+      "expected": {
+        "canonical": "{\"text\":\"</script><!-- R&D -->\"}"
+      }
+    },
+    {
+      "name": "nested",
+      "description": "Every level is sorted.",
+      "inputJson": "{ \"step\": { \"by\": { \"address\": \"ada@example.com\", \"actor\": \"agent\" }, \"at\": \"2026-11-21T10:00:00.000Z\", \"id\": \"st_1\" }, \"v\": 1 }",
+      "expected": {
+        "canonical": "{\"step\":{\"at\":\"2026-11-21T10:00:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_1\"},\"v\":1}"
+      }
+    },
+    {
+      "name": "literals",
+      "description": "true, false and null.",
+      "inputJson": "{ \"t\": true, \"f\": false, \"n\": null }",
+      "expected": {
+        "canonical": "{\"f\":false,\"n\":null,\"t\":true}"
+      }
+    },
+    {
+      "name": "nesting at the limit",
+      "description": "65 nested arrays, 64 levels below the top: the deepest this implementation canonicalises (protocol 4.2 caps a step at 64 levels).",
+      "inputJson": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "expected": {
+        "canonical": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+      }
+    },
+    {
+      "name": "nesting past the limit",
+      "description": "66 nested arrays: refused.",
+      "inputJson": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]",
+      "expected": {
+        "error": true
+      }
+    },
+    {
+      "name": "non-finite number",
+      "description": "1e400 parses to infinity, which JSON cannot hold: refused.",
+      "inputJson": "[1e400]",
+      "expected": {
+        "error": true
+      }
+    }
+  ]
+}

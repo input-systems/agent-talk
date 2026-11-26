@@ -1,0 +1,1160 @@
+{
+  "description": "Step signatures. sign: sign step with signer's key and compare; the sig is the protected header segment, an empty payload segment and the signature (a detached compact JWS over the step in JCS without seq and sig). verify: check step.sig against the key the receiver holds for issuer and the header's kid.",
+  "version": 1,
+  "cases": [
+    {
+      "kind": "sign",
+      "name": "sign ask",
+      "description": "The ask step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z"
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"answerBy\":\"personOrAgent\",\"at\":\"2026-11-21T10:00:00.000Z\",\"autoUntil\":\"2026-11-21T11:00:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"can\":{\"counter\":true,\"decline\":true,\"text\":false},\"context\":[\"Both free after 7\"],\"effect\":\"event\",\"email\":\"<ask-1@north.example>\",\"expires\":\"2026-11-28T10:00:00.000Z\",\"id\":\"st_ask\",\"needs\":[\"calendar.book\"],\"options\":[{\"id\":\"tue\",\"isRecommended\":true,\"label\":\"Tuesday · 7:30 PM\",\"value\":{\"end\":\"2026-11-24T21:30:00+01:00\",\"start\":\"2026-11-24T19:30:00+01:00\",\"text\":\"Tue 24 Nov, 19:30–21:30\",\"timeZone\":\"Europe/Amsterdam\",\"type\":\"time\"}},{\"id\":\"thu\",\"label\":\"Thursday · 8:00 PM\"}],\"question\":\"Which evening works for dinner?\",\"talk\":\"tk_dinner\",\"text\":\"Ada's agent asks which evening works for dinner.\",\"to\":[\"ben@example.org\"],\"type\":\"ask\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhbnN3ZXJCeSI6InBlcnNvbk9yQWdlbnQiLCJhdCI6IjIwMjYtMTEtMjFUMTA6MDA6MDAuMDAwWiIsImF1dG9VbnRpbCI6IjIwMjYtMTEtMjFUMTE6MDA6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoiYWdlbnQiLCJhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIn0sImNhbiI6eyJjb3VudGVyIjp0cnVlLCJkZWNsaW5lIjp0cnVlLCJ0ZXh0IjpmYWxzZX0sImNvbnRleHQiOlsiQm90aCBmcmVlIGFmdGVyIDciXSwiZWZmZWN0IjoiZXZlbnQiLCJlbWFpbCI6Ijxhc2stMUBub3J0aC5leGFtcGxlPiIsImV4cGlyZXMiOiIyMDI2LTExLTI4VDEwOjAwOjAwLjAwMFoiLCJpZCI6InN0X2FzayIsIm5lZWRzIjpbImNhbGVuZGFyLmJvb2siXSwib3B0aW9ucyI6W3siaWQiOiJ0dWUiLCJpc1JlY29tbWVuZGVkIjp0cnVlLCJsYWJlbCI6IlR1ZXNkYXkgwrcgNzozMCBQTSIsInZhbHVlIjp7ImVuZCI6IjIwMjYtMTEtMjRUMjE6MzA6MDArMDE6MDAiLCJzdGFydCI6IjIwMjYtMTEtMjRUMTk6MzA6MDArMDE6MDAiLCJ0ZXh0IjoiVHVlIDI0IE5vdiwgMTk6MzDigJMyMTozMCIsInRpbWVab25lIjoiRXVyb3BlL0Ftc3RlcmRhbSIsInR5cGUiOiJ0aW1lIn19LHsiaWQiOiJ0aHUiLCJsYWJlbCI6IlRodXJzZGF5IMK3IDg6MDAgUE0ifV0sInF1ZXN0aW9uIjoiV2hpY2ggZXZlbmluZyB3b3JrcyBmb3IgZGlubmVyPyIsInRhbGsiOiJ0a19kaW5uZXIiLCJ0ZXh0IjoiQWRhJ3MgYWdlbnQgYXNrcyB3aGljaCBldmVuaW5nIHdvcmtzIGZvciBkaW5uZXIuIiwidG8iOlsiYmVuQGV4YW1wbGUub3JnIl0sInR5cGUiOiJhc2sifQ",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign answer",
+      "description": "The answer step, signed by south.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "south.example",
+      "step": {
+        "id": "st_answer",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:30:00.000Z",
+        "by": {
+          "address": "ben@example.org",
+          "actor": "person"
+        },
+        "re": "st_ask",
+        "email": "<reply-1@south.example>",
+        "text": "Ben picked Tuesday at 7:30 PM.",
+        "type": "answer",
+        "result": "answered",
+        "picks": [
+          "tue"
+        ],
+        "receipt": {
+          "shared": "Ben's choice of evening"
+        }
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "south-2026-11"
+        },
+        "canonicalPayload": "{\"at\":\"2026-11-21T10:30:00.000Z\",\"by\":{\"actor\":\"person\",\"address\":\"ben@example.org\"},\"email\":\"<reply-1@south.example>\",\"id\":\"st_answer\",\"picks\":[\"tue\"],\"re\":\"st_ask\",\"receipt\":{\"shared\":\"Ben's choice of evening\"},\"result\":\"answered\",\"talk\":\"tk_dinner\",\"text\":\"Ben picked Tuesday at 7:30 PM.\",\"type\":\"answer\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6InNvdXRoLTIwMjYtMTEifQ.eyJhdCI6IjIwMjYtMTEtMjFUMTA6MzA6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoicGVyc29uIiwiYWRkcmVzcyI6ImJlbkBleGFtcGxlLm9yZyJ9LCJlbWFpbCI6IjxyZXBseS0xQHNvdXRoLmV4YW1wbGU-IiwiaWQiOiJzdF9hbnN3ZXIiLCJwaWNrcyI6WyJ0dWUiXSwicmUiOiJzdF9hc2siLCJyZWNlaXB0Ijp7InNoYXJlZCI6IkJlbidzIGNob2ljZSBvZiBldmVuaW5nIn0sInJlc3VsdCI6ImFuc3dlcmVkIiwidGFsayI6InRrX2Rpbm5lciIsInRleHQiOiJCZW4gcGlja2VkIFR1ZXNkYXkgYXQgNzozMCBQTS4iLCJ0eXBlIjoiYW5zd2VyIn0",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6InNvdXRoLTIwMjYtMTEifQ..QBB5JNbSO7W5kY-VTnT26W13zgeW1ldCkthfJPx-2eq2Ca_id7FV9rG-WppUVWxmTOLbegUKAPmi_JqHq6BGBA"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign say with values and about",
+      "description": "The say with values and about step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_say",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:05:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "text": "Ada's agent shares the restaurant and the deposit.",
+        "type": "say",
+        "values": [
+          {
+            "type": "place",
+            "text": "Café Riche, Amsterdam",
+            "name": "Café Riche",
+            "address": "Damrak 1, Amsterdam"
+          },
+          {
+            "type": "amount",
+            "text": "€20.00 deposit",
+            "currency": "EUR",
+            "amount": "20.00"
+          },
+          {
+            "type": "contact",
+            "text": "Ada",
+            "address": "ada@example.com",
+            "name": "Ada"
+          }
+        ],
+        "about": {
+          "@type": "FoodEstablishmentReservation",
+          "reservationStatus": "ReservationPending"
+        }
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"about\":{\"@type\":\"FoodEstablishmentReservation\",\"reservationStatus\":\"ReservationPending\"},\"at\":\"2026-11-21T10:05:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_say\",\"talk\":\"tk_dinner\",\"text\":\"Ada's agent shares the restaurant and the deposit.\",\"type\":\"say\",\"values\":[{\"address\":\"Damrak 1, Amsterdam\",\"name\":\"Café Riche\",\"text\":\"Café Riche, Amsterdam\",\"type\":\"place\"},{\"amount\":\"20.00\",\"currency\":\"EUR\",\"text\":\"€20.00 deposit\",\"type\":\"amount\"},{\"address\":\"ada@example.com\",\"name\":\"Ada\",\"text\":\"Ada\",\"type\":\"contact\"}]}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhYm91dCI6eyJAdHlwZSI6IkZvb2RFc3RhYmxpc2htZW50UmVzZXJ2YXRpb24iLCJyZXNlcnZhdGlvblN0YXR1cyI6IlJlc2VydmF0aW9uUGVuZGluZyJ9LCJhdCI6IjIwMjYtMTEtMjFUMTA6MDU6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoiYWdlbnQiLCJhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIn0sImlkIjoic3Rfc2F5IiwidGFsayI6InRrX2Rpbm5lciIsInRleHQiOiJBZGEncyBhZ2VudCBzaGFyZXMgdGhlIHJlc3RhdXJhbnQgYW5kIHRoZSBkZXBvc2l0LiIsInR5cGUiOiJzYXkiLCJ2YWx1ZXMiOlt7ImFkZHJlc3MiOiJEYW1yYWsgMSwgQW1zdGVyZGFtIiwibmFtZSI6IkNhZsOpIFJpY2hlIiwidGV4dCI6IkNhZsOpIFJpY2hlLCBBbXN0ZXJkYW0iLCJ0eXBlIjoicGxhY2UifSx7ImFtb3VudCI6IjIwLjAwIiwiY3VycmVuY3kiOiJFVVIiLCJ0ZXh0Ijoi4oKsMjAuMDAgZGVwb3NpdCIsInR5cGUiOiJhbW91bnQifSx7ImFkZHJlc3MiOiJhZGFAZXhhbXBsZS5jb20iLCJuYW1lIjoiQWRhIiwidGV4dCI6IkFkYSIsInR5cGUiOiJjb250YWN0In1dfQ",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..iYrA_RAZyIwQ3oZEBkXPyHuXRfDvsXL6qpsaKHN9SesIhw-3sGJHCnxNUTn3n3VN_OF3pD__mNbjPBq9jQUiCA"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign say with unicode and markup in text",
+      "description": "The say with unicode and markup in text step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_unicode",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:06:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "text": "Café 🍷 at 7 — <b>R&D</b>   \"quoted\"",
+        "type": "say"
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"at\":\"2026-11-21T10:06:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_unicode\",\"talk\":\"tk_dinner\",\"text\":\"Café 🍷 at 7 — <b>R&D</b>   \\\"quoted\\\"\",\"type\":\"say\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhdCI6IjIwMjYtMTEtMjFUMTA6MDY6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoiYWdlbnQiLCJhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIn0sImlkIjoic3RfdW5pY29kZSIsInRhbGsiOiJ0a19kaW5uZXIiLCJ0ZXh0IjoiQ2Fmw6kg8J-NtyBhdCA3IOKAlCA8Yj5SJkQ8L2I-IOKAqCBcInF1b3RlZFwiIiwidHlwZSI6InNheSJ9",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..xoDMlQRlEettaY2YUQoDIJJPw1I8gKFxB6s5pIyXtGwtp5ZLz4jfZ9Fmo9-co6V_8rTDJtZMMipWmKaaYTITCA"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign wait",
+      "description": "The wait step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_wait",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:10:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "re": "st_ask",
+        "text": "Ada will decide.",
+        "type": "wait"
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"at\":\"2026-11-21T10:10:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_wait\",\"re\":\"st_ask\",\"talk\":\"tk_dinner\",\"text\":\"Ada will decide.\",\"type\":\"wait\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhdCI6IjIwMjYtMTEtMjFUMTA6MTA6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoiYWdlbnQiLCJhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIn0sImlkIjoic3Rfd2FpdCIsInJlIjoic3RfYXNrIiwidGFsayI6InRrX2Rpbm5lciIsInRleHQiOiJBZGEgd2lsbCBkZWNpZGUuIiwidHlwZSI6IndhaXQifQ",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..d6eNsNd-O2SU0GTQkfAZAxRb61mA2JJeuI93js7iU1Qi6fO9enGMataAxUJhf8qEoIeiXjiaZC4C-ZreeK97Cg"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign hold",
+      "description": "The hold step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_hold",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:11:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "text": "Paused: someone new joined the thread.",
+        "type": "hold",
+        "reason": "audience",
+        "addresses": [
+          "carol@example.com"
+        ]
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"addresses\":[\"carol@example.com\"],\"at\":\"2026-11-21T10:11:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_hold\",\"reason\":\"audience\",\"talk\":\"tk_dinner\",\"text\":\"Paused: someone new joined the thread.\",\"type\":\"hold\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhZGRyZXNzZXMiOlsiY2Fyb2xAZXhhbXBsZS5jb20iXSwiYXQiOiIyMDI2LTExLTIxVDEwOjExOjAwLjAwMFoiLCJieSI6eyJhY3RvciI6ImFnZW50IiwiYWRkcmVzcyI6ImFkYUBleGFtcGxlLmNvbSJ9LCJpZCI6InN0X2hvbGQiLCJyZWFzb24iOiJhdWRpZW5jZSIsInRhbGsiOiJ0a19kaW5uZXIiLCJ0ZXh0IjoiUGF1c2VkOiBzb21lb25lIG5ldyBqb2luZWQgdGhlIHRocmVhZC4iLCJ0eXBlIjoiaG9sZCJ9",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..rnfnAWfewmLSvl4fJz5YDggQXtpsdhSyL-0ax1k02II4UbvYQAsel-F1vB_613vjnRiHey3FF94PnA2_63t-DQ"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign resume",
+      "description": "The resume step, signed by south.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "south.example",
+      "step": {
+        "id": "st_resume",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:12:00.000Z",
+        "by": {
+          "address": "ben@example.org",
+          "actor": "person"
+        },
+        "text": "Ben resumed the talk.",
+        "type": "resume"
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "south-2026-11"
+        },
+        "canonicalPayload": "{\"at\":\"2026-11-21T10:12:00.000Z\",\"by\":{\"actor\":\"person\",\"address\":\"ben@example.org\"},\"id\":\"st_resume\",\"talk\":\"tk_dinner\",\"text\":\"Ben resumed the talk.\",\"type\":\"resume\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6InNvdXRoLTIwMjYtMTEifQ.eyJhdCI6IjIwMjYtMTEtMjFUMTA6MTI6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoicGVyc29uIiwiYWRkcmVzcyI6ImJlbkBleGFtcGxlLm9yZyJ9LCJpZCI6InN0X3Jlc3VtZSIsInRhbGsiOiJ0a19kaW5uZXIiLCJ0ZXh0IjoiQmVuIHJlc3VtZWQgdGhlIHRhbGsuIiwidHlwZSI6InJlc3VtZSJ9",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6InNvdXRoLTIwMjYtMTEifQ..XARy5QXjS5xODo8Q6dOBfIgCuWQFwd18oEI2Lx3JeHP1lg5XxOCpA4o6MtkJhgqmedDxNJU7icZpLzAKfvpOBA"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign close",
+      "description": "The close step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_close",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:40:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "text": "Dinner is booked for Tuesday at 7:30 PM.",
+        "type": "close",
+        "reason": "done",
+        "outcome": [
+          {
+            "type": "time",
+            "text": "Tue 24 Nov, 19:30–21:30",
+            "start": "2026-11-24T19:30:00+01:00",
+            "end": "2026-11-24T21:30:00+01:00",
+            "timeZone": "Europe/Amsterdam"
+          }
+        ]
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"at\":\"2026-11-21T10:40:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_close\",\"outcome\":[{\"end\":\"2026-11-24T21:30:00+01:00\",\"start\":\"2026-11-24T19:30:00+01:00\",\"text\":\"Tue 24 Nov, 19:30–21:30\",\"timeZone\":\"Europe/Amsterdam\",\"type\":\"time\"}],\"reason\":\"done\",\"talk\":\"tk_dinner\",\"text\":\"Dinner is booked for Tuesday at 7:30 PM.\",\"type\":\"close\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhdCI6IjIwMjYtMTEtMjFUMTA6NDA6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoiYWdlbnQiLCJhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIn0sImlkIjoic3RfY2xvc2UiLCJvdXRjb21lIjpbeyJlbmQiOiIyMDI2LTExLTI0VDIxOjMwOjAwKzAxOjAwIiwic3RhcnQiOiIyMDI2LTExLTI0VDE5OjMwOjAwKzAxOjAwIiwidGV4dCI6IlR1ZSAyNCBOb3YsIDE5OjMw4oCTMjE6MzAiLCJ0aW1lWm9uZSI6IkV1cm9wZS9BbXN0ZXJkYW0iLCJ0eXBlIjoidGltZSJ9XSwicmVhc29uIjoiZG9uZSIsInRhbGsiOiJ0a19kaW5uZXIiLCJ0ZXh0IjoiRGlubmVyIGlzIGJvb2tlZCBmb3IgVHVlc2RheSBhdCA3OjMwIFBNLiIsInR5cGUiOiJjbG9zZSJ9",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..yNztNIw0xU3PXOnvwsg1VHJVmrWNsK2pIZ1WTfFx3S0ne72XKJKGrLm2NI_v9IDgaa_atvtr99flia3HbEeNBA"
+      }
+    },
+    {
+      "kind": "sign",
+      "name": "sign private type",
+      "description": "The private type step, signed by north.example: a detached compact JWS over the step in JCS, without seq and sig.",
+      "signer": "north.example",
+      "step": {
+        "id": "st_vote",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:13:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "text": "Ada's agent opened a vote.",
+        "type": "x-vote"
+      },
+      "expected": {
+        "protectedHeader": {
+          "alg": "EdDSA",
+          "kid": "north-2026-11"
+        },
+        "canonicalPayload": "{\"at\":\"2026-11-21T10:13:00.000Z\",\"by\":{\"actor\":\"agent\",\"address\":\"ada@example.com\"},\"id\":\"st_vote\",\"talk\":\"tk_dinner\",\"text\":\"Ada's agent opened a vote.\",\"type\":\"x-vote\"}",
+        "signingInput": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhdCI6IjIwMjYtMTEtMjFUMTA6MTM6MDAuMDAwWiIsImJ5Ijp7ImFjdG9yIjoiYWdlbnQiLCJhZGRyZXNzIjoiYWRhQGV4YW1wbGUuY29tIn0sImlkIjoic3Rfdm90ZSIsInRhbGsiOiJ0a19kaW5uZXIiLCJ0ZXh0IjoiQWRhJ3MgYWdlbnQgb3BlbmVkIGEgdm90ZS4iLCJ0eXBlIjoieC12b3RlIn0",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..u-qqw1vK9h3Czwvcrwb4Of50oc-VXMfsoFbQlcpmKZ3qiFaMBGc0uzYCT4wXsgvRpa7FTQ524ZAU_gWbEuGGDA"
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify valid",
+      "description": "The ask as north.example signed it.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify valid with seq",
+      "description": "seq is the host's order and is not signed: adding it keeps the signature.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA",
+        "seq": 7
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify valid with keys in another order",
+      "description": "The payload is the step in JCS, so the order the keys arrive in does not matter.",
+      "step": {
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "effect": "event",
+        "needs": [
+          "calendar.book"
+        ],
+        "answerBy": "personOrAgent",
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "context": [
+          "Both free after 7"
+        ],
+        "question": "Which evening works for dinner?",
+        "to": [
+          "ben@example.org"
+        ],
+        "type": "ask",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "email": "<ask-1@north.example>",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "at": "2026-11-21T10:00:00.000Z",
+        "talk": "tk_dinner",
+        "id": "st_ask"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify tampered text",
+      "description": "text changed after signing.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify tampered nested field",
+      "description": "One option's label changed after signing.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Friday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify added field",
+      "description": "A field added after signing is part of the payload, so the signature fails.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA",
+        "via": "app"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify wrong key",
+      "description": "Signed with south.example's private key under north.example's kid.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..bySTPL6LuTQeX5nuu1mn9CQWWL2z-uicgL9ksbIvFycrhGpAxvFR9MRDp5NgYzjvtdjhJAd8l4EuQ9ujizBvCQ"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify other issuer",
+      "description": "A step north.example signed, checked as south.example's: the receiver holds no key for south.example under north.example's kid.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      },
+      "issuer": "south.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify unknown issuer",
+      "description": "Signed by rogue.example, whose keys the receiver does not hold.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6InJvZ3VlLTIwMjYtMTEifQ..kRVXsI_2V7BRkc4nzWvRnr9J8A-eks86zX1d9ciZVk2ETqC76tD1pBG8v4uRmSPeWBNmrJIIKy4wMeyt-QFyBw"
+      },
+      "issuer": "rogue.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify unknown issuer even with its key",
+      "description": "The same rogue step, for a receiver that does hold rogue.example's key: it verifies. Recognition is the receiver's list, not the signature.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6InJvZ3VlLTIwMjYtMTEifQ..kRVXsI_2V7BRkc4nzWvRnr9J8A-eks86zX1d9ciZVk2ETqC76tD1pBG8v4uRmSPeWBNmrJIIKy4wMeyt-QFyBw"
+      },
+      "issuer": "rogue.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        },
+        {
+          "iss": "rogue.example",
+          "kid": "rogue-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": true
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify attached payload",
+      "description": "A sig whose middle segment is not empty is not a detached JWS.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJpZCI6InN0X2FzayJ9.4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    },
+    {
+      "kind": "verify",
+      "name": "verify alg none",
+      "description": "A protected header that does not say EdDSA.",
+      "step": {
+        "id": "st_ask",
+        "talk": "tk_dinner",
+        "at": "2026-11-21T10:00:00.000Z",
+        "by": {
+          "address": "ada@example.com",
+          "actor": "agent"
+        },
+        "email": "<ask-1@north.example>",
+        "text": "Ada's agent asks which evening works for dinner.",
+        "type": "ask",
+        "to": [
+          "ben@example.org"
+        ],
+        "question": "Which evening works for dinner?",
+        "context": [
+          "Both free after 7"
+        ],
+        "options": [
+          {
+            "id": "tue",
+            "label": "Tuesday · 7:30 PM",
+            "isRecommended": true,
+            "value": {
+              "type": "time",
+              "text": "Tue 24 Nov, 19:30–21:30",
+              "start": "2026-11-24T19:30:00+01:00",
+              "end": "2026-11-24T21:30:00+01:00",
+              "timeZone": "Europe/Amsterdam"
+            }
+          },
+          {
+            "id": "thu",
+            "label": "Thursday · 8:00 PM"
+          }
+        ],
+        "can": {
+          "counter": true,
+          "decline": true,
+          "text": false
+        },
+        "answerBy": "personOrAgent",
+        "needs": [
+          "calendar.book"
+        ],
+        "effect": "event",
+        "autoUntil": "2026-11-21T11:00:00.000Z",
+        "expires": "2026-11-28T10:00:00.000Z",
+        "sig": "eyJhbGciOiJub25lIiwia2lkIjoibm9ydGgtMjAyNi0xMSJ9..4cm3tNf1RiFtVFqkxS_PxYy6U6mlQh-UtrxGOfKNO-POnF5XwFye7uFVmKHpYSHweKMid3Y674psslCamjeyBA"
+      },
+      "issuer": "north.example",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false
+      }
+    }
+  ]
+}

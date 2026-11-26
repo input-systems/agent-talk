@@ -48,12 +48,18 @@ export const formatAgentTalkStepBlock = (input: { token: string; step: AgentTalk
     return `<script type="${AGENT_TALK_MEDIA_TYPE}">${json}</script>`;
 };
 
+// line wrapping in transit adds a line break every 76 characters or so; anything longer than this is not a wrapped block
+const WRAPPED_BLOCK_MAX = AGENT_TALK_LIMIT.STEP_BLOCK * 2;
+
 const parseBlockJson = (json: string): UncheckedStepBlock | null => {
-    if (json.length > AGENT_TALK_LIMIT.STEP_BLOCK) return null;
+    if (json.length > WRAPPED_BLOCK_MAX) return null;
+    // a json string cannot hold a raw line break, so dropping them all undoes a mail server's line wrapping. the cap is on
+    // the block as its sender wrote it
+    const unwrapped = json.replace(/[\r\n]/g, "");
+    if (unwrapped.length > AGENT_TALK_LIMIT.STEP_BLOCK) return null;
 
     try {
-        // a json string cannot hold a raw line break, so dropping them all undoes a mail server's line wrapping
-        const value: unknown = JSON.parse(json.replace(/[\r\n]/g, ""));
+        const value: unknown = JSON.parse(unwrapped);
         if (!getIsJsonObject(value) || typeof value.v !== "number" || typeof value.token !== "string") return null;
 
         return { v: value.v, token: value.token, step: value.step };

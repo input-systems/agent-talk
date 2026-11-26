@@ -1,0 +1,596 @@
+{
+  "description": "Presence tokens (protocol 3). Check token against from at now, with only the keys in receiverKeys. Checks run in this order and the first that fails is the reason: malformed (not a compact JWS with alg EdDSA and a kid, typ not agent-talk-presence, or claims of the wrong shape), unknownKey, badSignature, wrongVersion, fromMismatch, postDated (iat more than 300 s after now), tooLong (exp - iat over 90 days), expired (now >= exp). signer names the service whose key made the signature, when it is genuine, so it can be reproduced.",
+  "version": 1,
+  "cases": [
+    {
+      "name": "valid",
+      "description": "Ada's presence, signed by north.example, on mail from Ada.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": true,
+        "claims": {
+          "acc": [
+            "ask",
+            "say"
+          ],
+          "exp": 1803031200,
+          "iat": 1795255200,
+          "iss": "north.example",
+          "sub": "ada@example.com",
+          "types": [
+            "time",
+            "busy",
+            "text"
+          ],
+          "v": 1
+        }
+      }
+    },
+    {
+      "name": "valid with From in another case",
+      "description": "The From address is compared trimmed and lowercased.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": " Ada@Example.COM ",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": true,
+        "claims": {
+          "acc": [
+            "ask",
+            "say"
+          ],
+          "exp": 1803031200,
+          "iat": 1795255200,
+          "iss": "north.example",
+          "sub": "ada@example.com",
+          "types": [
+            "time",
+            "busy",
+            "text"
+          ],
+          "v": 1
+        }
+      }
+    },
+    {
+      "name": "valid with isOpen",
+      "description": "An open address sets isOpen: true.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIl0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc09wZW4iOnRydWUsImlzcyI6Im5vcnRoLmV4YW1wbGUiLCJzdWIiOiJzdXBwb3J0QGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGV4dCJdLCJ2IjoxfQ.2zsXlOxh46uXUsiqEzhQKl9uR9YyEuDb8mmLv7gnhpJEdLDVIY9QDJglrAyMsXCGt9r3ooV9Rqvz4KFWXU7oAQ",
+      "from": "support@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": true,
+        "claims": {
+          "acc": [
+            "ask"
+          ],
+          "exp": 1803031200,
+          "iat": 1795255200,
+          "isOpen": true,
+          "iss": "north.example",
+          "sub": "support@example.com",
+          "types": [
+            "text"
+          ],
+          "v": 1
+        }
+      }
+    },
+    {
+      "name": "From mismatch",
+      "description": "Ada's token on mail from Ben.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ben@example.org",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "fromMismatch"
+      }
+    },
+    {
+      "name": "quoted token",
+      "description": "Ben's reply quotes Ada's mail, and the token is lifted from the quote: it names Ada, not Ben. (Reading tokens only from the message itself is the caller's job, protocol 3.2 item 4.)",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ben@example.org",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "fromMismatch"
+      }
+    },
+    {
+      "name": "at the clock skew limit",
+      "description": "iat 5 minutes ahead of the receiver's clock still counts.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTUwMCwiaWF0IjoxNzk1MjU1NTAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.P7dqXzMlWwuUC0A97VhBhcEJ8khmmaTuzw0-fefdYu3HSHb0SCiR3DLd4-3e1fVSA0ZYkgwex2pVC-kC4yaJBQ",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": true,
+        "claims": {
+          "acc": [
+            "ask",
+            "say"
+          ],
+          "exp": 1803031500,
+          "iat": 1795255500,
+          "iss": "north.example",
+          "sub": "ada@example.com",
+          "types": [
+            "time",
+            "busy",
+            "text"
+          ],
+          "v": 1
+        }
+      }
+    },
+    {
+      "name": "post-dated",
+      "description": "iat 5 minutes and 1 second ahead of the receiver's clock.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTUwMSwiaWF0IjoxNzk1MjU1NTAxLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.617_5Tc32rg_5-ZbulJW2Je15SbW7JDseEkEzlUPMcFuonhPBUeeJk5HPPqU6Xmq1HxfJn5nFspbMhSPJ4eODQ",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "postDated"
+      }
+    },
+    {
+      "name": "valid one second before exp",
+      "description": "Checked at exp - 1.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ada@example.com",
+      "now": "2027-02-19T09:59:59.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": true,
+        "claims": {
+          "acc": [
+            "ask",
+            "say"
+          ],
+          "exp": 1803031200,
+          "iat": 1795255200,
+          "iss": "north.example",
+          "sub": "ada@example.com",
+          "types": [
+            "time",
+            "busy",
+            "text"
+          ],
+          "v": 1
+        }
+      }
+    },
+    {
+      "name": "expired at exp",
+      "description": "Checked at exactly exp: a token counts only while now < exp.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ada@example.com",
+      "now": "2027-02-19T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "expired"
+      }
+    },
+    {
+      "name": "lifetime of exactly 90 days",
+      "description": "exp - iat = 90 days is allowed.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": true,
+        "claims": {
+          "acc": [
+            "ask",
+            "say"
+          ],
+          "exp": 1803031200,
+          "iat": 1795255200,
+          "iss": "north.example",
+          "sub": "ada@example.com",
+          "types": [
+            "time",
+            "busy",
+            "text"
+          ],
+          "v": 1
+        }
+      }
+    },
+    {
+      "name": "too long",
+      "description": "exp - iat = 90 days and 1 second.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMSwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.CvAQ9sR4Kcy0Adr-FeKMJVousBeNCZ3XRheuYQvcwt6iYfhJUxkLIADVHwhKyPPgmAaT6cqdWmeme2p5tkLPAQ",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "tooLong"
+      }
+    },
+    {
+      "name": "wrong version",
+      "description": "v: 2, correctly signed.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjJ9.-AeSBu0yaJEAebhwOkfST9oEI-8OWx8mgT4PNJCQ1kWTwCDWqXN99jqhYJCITuJQ_OEth4BpwHWbO6JUzOmEBw",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "wrongVersion"
+      }
+    },
+    {
+      "name": "tampered sub",
+      "description": "sub changed to Ben after signing, on mail from Ben: the signature fails before From is compared.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYmVuQGV4YW1wbGUub3JnIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ben@example.org",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false,
+        "reason": "badSignature"
+      }
+    },
+    {
+      "name": "wrong key",
+      "description": "Signed with south.example's private key under north.example's kid.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.LKCABZJzoAMAVmbADOHuaZamUF0E8XMtvAge7ikXqyqGu8h1PoBVlMpjUP431T7N9eWZ3L0h6mUk3aIymEMaBw",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "south.example",
+      "expected": {
+        "isValid": false,
+        "reason": "badSignature"
+      }
+    },
+    {
+      "name": "unknown issuer",
+      "description": "Eve's presence, signed by rogue.example, which the receiver does not recognise.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6InJvZ3VlLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJyb2d1ZS5leGFtcGxlIiwic3ViIjoiZXZlQGV4YW1wbGUubmV0IiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.ib68D1xH4ukpuWrsZq7uOS6tfTbFsOg73o5Da95gbfAAwseef6bJdSy_4POdlsL49Xy3l2hdg6io7M69IkbZAQ",
+      "from": "eve@example.net",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "rogue.example",
+      "expected": {
+        "isValid": false,
+        "reason": "unknownKey"
+      }
+    },
+    {
+      "name": "unknown kid",
+      "description": "north.example as issuer, under a kid the receiver does not hold.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjUtMDEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.i4iAYT03D0KawVLnCiBTJeKSJvBSTQp974YbbiEKvLETEHjrbRSsyUMJpvB8Dg4yDjzUiyq1cXbuIWZKE57OBw",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "unknownKey"
+      }
+    },
+    {
+      "name": "issuer and kid of different services",
+      "description": "iss north.example with south.example's kid, signed by south: keys are looked up by the pair, which the receiver does not hold.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6InNvdXRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.YVQLd9KBxj8V9qyKOy7CA8ms-LiUXresQiN_ls1kcpSVGk6KGtJYartyAVuiA3904w8fIUd1pQKeYVMCFZ2oAQ",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "south.example",
+      "expected": {
+        "isValid": false,
+        "reason": "unknownKey"
+      }
+    },
+    {
+      "name": "talk token as presence",
+      "description": "A talk token: its typ is not agent-talk-presence.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXRhbGsifQ.eyJleHAiOjE3OTU4NjAwMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN0ZXAiOiJzdF9hc2siLCJzdWIiOiJhZGFAZXhhbXBsZS5jb20iLCJ0YWxrIjoidGtfZGlubmVyIiwidiI6MX0.sCIU3kNmyiJeDxFTin9yKLmFwEI33b7E2-_eQnSWZG05VEihh9ivOwUMR3BbW39M5f-hIXb8137keguX7fTaCA",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "malformed"
+      }
+    },
+    {
+      "name": "no typ",
+      "description": "Presence claims under a header with no typ.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEifQ.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.wl36JQbXmS8vToH-p36hKGKpVk1LHiMKAE9ffOk8tRjr8Ul5K_LgGDhReMY9SEJACDeGUSzBxPoWlKRV25YYBQ",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "malformed"
+      }
+    },
+    {
+      "name": "missing claim",
+      "description": "No acc.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.eyJleHAiOjE4MDMwMzEyMDAsImlhdCI6MTc5NTI1NTIwMCwiaXNzIjoibm9ydGguZXhhbXBsZSIsInN1YiI6ImFkYUBleGFtcGxlLmNvbSIsInR5cGVzIjpbInRpbWUiLCJidXN5IiwidGV4dCJdLCJ2IjoxfQ.qaLu7Boc35UwTCMELw9-VSAqUai3B7unwdbQpkBK49EAuWhXy-8iJLyXcEjigr5_q2XXSaOMNyT4J4Dd6ybBBA",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "signer": "north.example",
+      "expected": {
+        "isValid": false,
+        "reason": "malformed"
+      }
+    },
+    {
+      "name": "not a jws",
+      "description": "Two segments.",
+      "token": "eyJhbGciOiJFZERTQSJ9.eyJ2IjoxfQ",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false,
+        "reason": "malformed"
+      }
+    },
+    {
+      "name": "alg none",
+      "description": "A header that says none, with no signature.",
+      "token": "eyJhbGciOiJub25lIiwia2lkIjoibm9ydGgtMjAyNi0xMSIsInR5cCI6ImFnZW50LXRhbGstcHJlc2VuY2UifQ.eyJhY2MiOlsiYXNrIiwic2F5Il0sImV4cCI6MTgwMzAzMTIwMCwiaWF0IjoxNzk1MjU1MjAwLCJpc3MiOiJub3J0aC5leGFtcGxlIiwic3ViIjoiYWRhQGV4YW1wbGUuY29tIiwidHlwZXMiOlsidGltZSIsImJ1c3kiLCJ0ZXh0Il0sInYiOjF9.",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false,
+        "reason": "malformed"
+      }
+    },
+    {
+      "name": "not base64url",
+      "description": "Padding and + in a segment.",
+      "token": "eyJhbGciOiJFZERTQSIsImtpZCI6Im5vcnRoLTIwMjYtMTEiLCJ0eXAiOiJhZ2VudC10YWxrLXByZXNlbmNlIn0.ab+c=.kJthLrFNOwIwicDCaLJt9PA1bLxa93UySZyHEMwW5jvZV-ApjQH7M6m7xSa16bu7JGWYTRHYJIcT2R_8UsFOAg",
+      "from": "ada@example.com",
+      "now": "2026-11-21T10:00:00.000Z",
+      "receiverKeys": [
+        {
+          "iss": "north.example",
+          "kid": "north-2026-11"
+        },
+        {
+          "iss": "south.example",
+          "kid": "south-2026-11"
+        }
+      ],
+      "expected": {
+        "isValid": false,
+        "reason": "malformed"
+      }
+    }
+  ]
+}

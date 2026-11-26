@@ -129,6 +129,18 @@ describe("readAgentTalkStepBlock", () => {
         expect(await read(getPublicKey, getEmailHtml(wrapped))).toMatchObject({ isValid: true });
     });
 
+    it("caps a block by the json its sender wrote, not the line breaks added in transit", async () => {
+        const { key, getPublicKey } = await createKeys();
+        const { block } = await createCarried(key);
+        const json = getBlockJson(block);
+        const padding = "\r\n".repeat(Math.ceil((AGENT_TALK_LIMIT.STEP_BLOCK - json.length) / 2) + 10);
+
+        expect(await read(getPublicKey, getEmailHtml(`${OPENING_TAG}${padding}${json}${CLOSING_TAG}`))).toMatchObject({ isValid: true });
+        expect(
+            await read(getPublicKey, getEmailHtml(`${OPENING_TAG}${json}${" ".repeat(AGENT_TALK_LIMIT.STEP_BLOCK)}${CLOSING_TAG}`)),
+        ).toMatchObject({ isValid: false });
+    });
+
     it("reads a pretty-printed block in any letter case, beside other scripts", async () => {
         const { key, getPublicKey } = await createKeys();
         const { signed, talkToken } = await createCarried(key);

@@ -1,0 +1,93 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://input.so/agent-talk/v1/schemas/common.schema.json",
+    "title": "Agent Talk shared grammars",
+    "description": "The names, addresses, times and scopes every other Agent Talk schema refers to. Lengths count characters; the reference implementation counts UTF-16 code units, so a string with characters outside the Basic Multilingual Plane can pass a schema and still break a limit in code.",
+    "$defs": {
+        "id": {
+            "description": "A step or talk id: 1 to 128 letters, digits, - and _.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "optionId": {
+            "description": "An option or field id: 1 to 64 letters, digits, - and _.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "typeName": {
+            "description": "A step, value or field type as a receiver reads it: a lowercase letter, then letters, digits and -, at most 64 characters. A receiver accepts a name it does not know and shows the step or value by its text.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-z][A-Za-z0-9-]*$"
+        },
+        "privateType": {
+            "description": "A private step, value or scope name: x- and a short token, at most 64 characters.",
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^x-[a-z0-9][A-Za-z0-9-]{0,61}$"
+        },
+        "address": {
+            "$comment": "The code also requires the address to equal its own toLowerCase(), which rules out non-ASCII capitals in the local part as well; this pattern only rules out A-Z.",
+            "description": "A lowercased mailbox address with a plain host name and no spaces, quotes or brackets before the @, at most 254 characters. The address is the identity.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 254,
+            "pattern": "^[^\\s@<>()[\\]\\\\,;:\"`A-Z]+@[a-z0-9.-]+\\.[a-z0-9-]+$"
+        },
+        "time": {
+            "$comment": "The pattern is the code's shape; format date-time (asserted by ajv-formats) rejects impossible values such as 2026-99-99T99:99:99Z or 2026-02-30T00:00:00Z. The code checks the shape and that Date.parse returns a number.",
+            "description": "An RFC 3339 instant with a T, seconds and an offset.",
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "scope": {
+            "$comment": "An author writes a known scope, a tool scope or a private one (authorScope). A receiver also accepts any scope name and treats one it does not know as never granted.",
+            "description": "A scope as a receiver reads it: dotted tokens, at most 128 characters.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128,
+            "pattern": "^[a-z][A-Za-z0-9-]*(\\.[A-Za-z0-9-]+)*$"
+        },
+        "authorScope": {
+            "description": "A scope as an author writes it: one this version defines, a tool scope (tool.<name>.read or tool.<name>.write), or a private one.",
+            "anyOf": [
+                { "$ref": "#/$defs/knownScope" },
+                { "type": "string", "pattern": "^tool\\.([a-z0-9][a-z0-9-]{0,62})\\.(read|write)$" },
+                { "$ref": "#/$defs/privateType" }
+            ]
+        },
+        "knownScope": {
+            "enum": ["calendar.freeBusy", "calendar.book", "calendar.details", "mail.shared", "mail.own"]
+        },
+        "requestableScope": {
+            "description": "A scope the other side may ask to keep, or be told it was given.",
+            "enum": ["calendar.freeBusy", "calendar.book", "mail.shared"]
+        },
+        "stepType": {
+            "enum": ["say", "ask", "answer", "wait", "hold", "resume", "close"]
+        },
+        "valueType": {
+            "enum": ["text", "time", "busy", "date", "place", "contact", "amount", "link", "file"]
+        },
+        "issuer": {
+            "description": "A service, named by its lowercase DNS domain.",
+            "type": "string",
+            "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$"
+        },
+        "compactJws": {
+            "description": "A compact JWS (RFC 7515): three base64url segments.",
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+        },
+        "numericDate": {
+            "description": "Seconds since the epoch, as JWT writes iat and exp.",
+            "type": "number"
+        }
+    }
+}

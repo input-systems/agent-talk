@@ -194,11 +194,12 @@ export const createA2aGetTaskRequest = (id: string, taskId: string) => ({
     params: { id: taskId },
 });
 
-export const createA2aJsonRpcRequest = (id: string, message: A2aMessage) => ({
+// a SendMessage call; `tenant` routes it to an open door, as the door's card names it (a2a 1.0 `tenant`)
+export const createA2aJsonRpcRequest = (id: string, message: A2aMessage, tenant?: string) => ({
     jsonrpc: "2.0" as const,
     id,
     method: A2A_METHOD.SEND_MESSAGE,
-    params: { message },
+    params: { ...(tenant ? { tenant } : {}), message },
 });
 
 export const createA2aJsonRpcError = (id: string | number | null, error: A2aJsonRpcError): A2aJsonRpcResponse => ({

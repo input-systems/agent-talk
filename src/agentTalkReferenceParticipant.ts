@@ -189,6 +189,21 @@ export async function createAgentTalkReferenceParticipant(input: { issuer: strin
             return { step, email: await getEmail(step, step.text, new Date(answer.ask.expires), now) };
         },
 
+        // its person's agent says something in a talk it is in, with no person acting: each say counts against the agent's turn
+        // (rule 9)
+        async sendSay(say: { talk: string; text: string; now?: Date }) {
+            const now = say.now ?? new Date();
+
+            return await sign({
+                id: getId("st"),
+                talk: say.talk,
+                at: now.toISOString(),
+                by: { address, actor: AGENT_TALK_STEP_ACTOR.AGENT },
+                text: say.text,
+                type: AGENT_TALK_STEP_TYPE.SAY,
+            });
+        },
+
         // the one way a step from another service gets in, or null: the block counts (token bound to From, signed by a key it
         // holds, the message's own), the mail is authenticated as its From, and the step is for this person: an ask naming
         // their address, or an answer to an ask of theirs that is still open. a step it holds already is not taken again
@@ -222,6 +237,24 @@ export async function createAgentTalkReferenceParticipant(input: { issuer: strin
                 keysUrl: `https://${issuer}/.well-known/agent-talk-keys.json`,
                 addressCardUrl: `${a2aUrl}/cards/{address}`,
                 key,
+            });
+        },
+
+        // the card of its person's address when the person keeps an open door: the same card with what the door handles and the
+        // tenant its calls are routed by (protocol 9.1)
+        async getOpenDoorCard(tenant: string) {
+            return await createAgentTalkServiceCard({
+                name: address,
+                description: `${address} keeps an open door`,
+                version: "1.0.0",
+                providerOrganization: issuer,
+                providerUrl: `https://${issuer}`,
+                a2aUrl,
+                keysUrl: `https://${issuer}/.well-known/agent-talk-keys.json`,
+                addressCardUrl: `${a2aUrl}/cards/{address}`,
+                key,
+                tenant,
+                skills: [{ id: "question", name: "Question", description: "Anything its person may answer", tags: [] }],
             });
         },
 

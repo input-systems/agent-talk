@@ -1,0 +1,216 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://input.so/agent-talk/v1/schemas/step.schema.json",
+    "title": "Agent Talk signed step",
+    "description": "One signed entry in a talk, as it travels between services and in an email's block: the step its author's service signed, with sig, and with seq once the host ordered it. A receiver accepts a step type it does not know when the name is valid, and shows it by its text.",
+    "$comment": "Checks only code can do: the whole step at most 256000 characters as canonical JSON (RFC 8785) and nested at most 64 levels deep; every time a real instant; ask.expires after at and within 30 days of it; ask.autoUntil after at, within 24 hours of it and not after expires; a time value's end after its start; option ids unique within an ask; about at most 8000 characters as canonical JSON; sig verifying as a detached compact JWS (protected header { alg: EdDSA, kid }, no typ) over the step without seq and sig. An author (validateAgentTalkUnsignedStep) uses only the step types, value types and scopes this version defines, or private x- ones; this schema describes what a receiver accepts. Unknown properties are allowed: receivers ignore fields they do not know.",
+    "type": "object",
+    "required": ["id", "talk", "at", "by", "text", "type", "sig"],
+    "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/id" },
+        "talk": { "$ref": "common.schema.json#/$defs/id" },
+        "seq": { "description": "The host's order; present once the host accepted the step.", "type": "integer", "minimum": 0 },
+        "at": { "$ref": "common.schema.json#/$defs/time" },
+        "by": {
+            "type": "object",
+            "required": ["address", "actor"],
+            "properties": {
+                "address": { "$ref": "common.schema.json#/$defs/address" },
+                "actor": { "enum": ["person", "agent"] }
+            }
+        },
+        "via": { "enum": ["app", "link", "email"] },
+        "re": { "$ref": "common.schema.json#/$defs/id" },
+        "email": {
+            "description": "The Message-ID of the email that says this step in words, in angle brackets.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 998,
+            "pattern": "^<[^\\s<>@\"]+@[^\\s<>@\"]+>$"
+        },
+        "text": { "description": "The step in plain words.", "type": "string", "minLength": 1, "maxLength": 2000 },
+        "type": { "$ref": "common.schema.json#/$defs/typeName" },
+        "sig": { "description": "A detached compact JWS (header..signature).", "type": "string", "minLength": 1, "maxLength": 1024 }
+    },
+    "allOf": [
+        { "if": { "properties": { "type": { "const": "say" } } }, "then": { "$ref": "#/$defs/sayBody" } },
+        { "if": { "properties": { "type": { "const": "ask" } } }, "then": { "$ref": "#/$defs/askBody" } },
+        { "if": { "properties": { "type": { "const": "answer" } } }, "then": { "$ref": "#/$defs/answerBody" } },
+        { "if": { "properties": { "type": { "const": "wait" } } }, "then": { "$ref": "#/$defs/waitBody" } },
+        { "if": { "properties": { "type": { "const": "hold" } } }, "then": { "$ref": "#/$defs/holdBody" } },
+        { "if": { "properties": { "type": { "const": "resume" } } }, "then": { "$ref": "#/$defs/resumeBody" } },
+        { "if": { "properties": { "type": { "const": "close" } } }, "then": { "$ref": "#/$defs/closeBody" } }
+    ],
+    "$defs": {
+        "orderedStep": {
+            "description": "A step as the host stores and relays it: with its order.",
+            "allOf": [{ "$ref": "#" }],
+            "required": ["seq"]
+        },
+        "sayBody": {
+            "properties": {
+                "values": { "type": "array", "maxItems": 8, "items": { "$ref": "value.schema.json" } },
+                "receipt": { "$ref": "#/$defs/receipt" },
+                "about": { "$ref": "#/$defs/about" }
+            }
+        },
+        "askBody": {
+            "required": ["to", "question", "can", "answerBy", "expires"],
+            "properties": {
+                "about": { "$ref": "#/$defs/about" },
+                "to": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "$ref": "common.schema.json#/$defs/address" } },
+                "title": { "type": "string", "minLength": 1, "maxLength": 60 },
+                "question": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "context": { "type": "array", "maxItems": 3, "items": { "type": "string", "minLength": 1, "maxLength": 120 } },
+                "options": {
+                    "description": "None makes an open ask. At most one is recommended.",
+                    "type": "array",
+                    "maxItems": 8,
+                    "items": { "$ref": "#/$defs/option" },
+                    "contains": { "properties": { "isRecommended": { "const": true } }, "required": ["isRecommended"] },
+                    "minContains": 0,
+                    "maxContains": 1
+                },
+                "select": { "description": "Defaults to one.", "enum": ["one", "many"] },
+                "fields": { "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/field" } },
+                "can": {
+                    "type": "object",
+                    "required": ["counter", "decline", "text"],
+                    "properties": {
+                        "counter": { "type": "boolean" },
+                        "decline": { "type": "boolean" },
+                        "text": { "type": "boolean" }
+                    }
+                },
+                "answerBy": { "enum": ["person", "personOrAgent"] },
+                "needs": { "type": "array", "maxItems": 8, "items": { "$ref": "common.schema.json#/$defs/scope" } },
+                "effect": { "description": "What a yes sets off on the asker's side.", "enum": ["event", "introduction"] },
+                "due": { "$ref": "common.schema.json#/$defs/time" },
+                "autoUntil": { "$ref": "common.schema.json#/$defs/time" },
+                "expires": { "$ref": "common.schema.json#/$defs/time" },
+                "counters": { "description": "With re: this ask replaces the one it answers.", "type": "boolean" },
+                "requestedScopes": { "type": "array", "maxItems": 3, "items": { "$ref": "common.schema.json#/$defs/requestableScope" } },
+                "requestedUntil": { "$ref": "common.schema.json#/$defs/time" }
+            },
+            "allOf": [
+                {
+                    "$comment": "a person decides whom they meet, and a yes has to name them",
+                    "if": { "properties": { "effect": { "const": "introduction" } }, "required": ["effect"] },
+                    "then": {
+                        "required": ["options"],
+                        "properties": {
+                            "answerBy": { "const": "person" },
+                            "options": {
+                                "contains": {
+                                    "required": ["value"],
+                                    "properties": { "value": { "required": ["type"], "properties": { "type": { "const": "contact" } } } }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "$comment": "only the person answers an ask that requests scopes",
+                    "if": { "properties": { "requestedScopes": { "minItems": 1 } }, "required": ["requestedScopes"] },
+                    "then": { "properties": { "answerBy": { "const": "person" } } }
+                },
+                {
+                    "$comment": "a counter names the ask it replaces",
+                    "if": { "properties": { "counters": { "const": true } }, "required": ["counters"] },
+                    "then": { "required": ["re"] }
+                }
+            ]
+        },
+        "answerBody": {
+            "required": ["re", "result"],
+            "properties": {
+                "result": { "enum": ["answered", "declined"] },
+                "picks": { "type": "array", "maxItems": 8, "items": { "$ref": "common.schema.json#/$defs/optionId" } },
+                "values": {
+                    "description": "Field id to value.",
+                    "type": "object",
+                    "maxProperties": 5,
+                    "propertyNames": { "$ref": "common.schema.json#/$defs/optionId" },
+                    "additionalProperties": { "$ref": "value.schema.json" }
+                },
+                "receipt": { "$ref": "#/$defs/receipt" },
+                "isInterpreted": { "type": "boolean" },
+                "granted": { "$ref": "#/$defs/granted" }
+            },
+            "if": { "properties": { "result": { "const": "declined" } }, "required": ["result"] },
+            "then": {
+                "$comment": "a decline carries no picks, values or granted scopes",
+                "properties": { "picks": { "maxItems": 0 } },
+                "not": { "anyOf": [{ "required": ["values"] }, { "required": ["granted"] }] }
+            }
+        },
+        "waitBody": {
+            "description": "This side's person has to act before it goes on; re names the step that needs them.",
+            "required": ["re"]
+        },
+        "holdBody": {
+            "required": ["reason"],
+            "properties": {
+                "reason": { "enum": ["audience", "person"] },
+                "addresses": { "type": "array", "maxItems": 50, "items": { "$ref": "common.schema.json#/$defs/address" } }
+            }
+        },
+        "resumeBody": {},
+        "closeBody": {
+            "required": ["reason"],
+            "properties": {
+                "reason": { "enum": ["done", "cancelled"] },
+                "outcome": { "type": "array", "maxItems": 8, "items": { "$ref": "value.schema.json" } }
+            }
+        },
+        "option": {
+            "type": "object",
+            "required": ["id", "label"],
+            "properties": {
+                "id": { "$ref": "common.schema.json#/$defs/optionId" },
+                "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+                "detail": { "type": "string", "minLength": 1, "maxLength": 120 },
+                "isRecommended": { "type": "boolean" },
+                "value": { "$ref": "value.schema.json" }
+            }
+        },
+        "field": {
+            "type": "object",
+            "required": ["id", "label", "type"],
+            "properties": {
+                "id": { "$ref": "common.schema.json#/$defs/optionId" },
+                "label": { "type": "string", "minLength": 1, "maxLength": 80 },
+                "type": { "$ref": "common.schema.json#/$defs/typeName" },
+                "isRequired": { "type": "boolean" }
+            }
+        },
+        "receipt": {
+            "description": "What was shared, and what was held back, in a line each.",
+            "type": "object",
+            "required": ["shared"],
+            "properties": {
+                "shared": { "type": "string", "minLength": 1, "maxLength": 120 },
+                "held": { "type": "string", "minLength": 1, "maxLength": 120 }
+            }
+        },
+        "about": {
+            "$comment": "At most 8000 characters as canonical JSON: only code can check that. Its other properties are the sender's, in schema.org's vocabulary.",
+            "description": "What a message is, as one schema.org object (Order, Invoice, ParcelDelivery, …).",
+            "type": "object",
+            "required": ["@type"],
+            "properties": {
+                "@type": { "type": "string", "minLength": 1, "maxLength": 64 }
+            }
+        },
+        "granted": {
+            "description": "What the person accepted of requestedScopes: for this talk only, or standing until removed or until a date.",
+            "type": "object",
+            "required": ["scopes", "isStanding"],
+            "properties": {
+                "scopes": { "type": "array", "maxItems": 3, "items": { "$ref": "common.schema.json#/$defs/requestableScope" } },
+                "isStanding": { "type": "boolean" },
+                "until": { "$ref": "common.schema.json#/$defs/time" }
+            }
+        }
+    }
+}

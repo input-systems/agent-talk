@@ -176,6 +176,21 @@ describe("ids, addresses and times", () => {
             issues: [{ path: "step.at" }],
         });
     });
+
+    it("refuses a time on a day that does not exist, or with a field out of range", () => {
+        for (const expires of [
+            "2026-02-30T10:00:00Z",
+            "2026-11-20T24:00:00Z",
+            "2026-11-20T10:60:00Z",
+            "2026-12-31T23:59:60Z",
+            "2026-11-28T10:00:00+24:00",
+        ]) {
+            const result = validateAgentTalkUnsignedStep(createAsk({ expires }));
+            expect(result.isValid).toBe(false);
+            if (!result.isValid) expect(result.issues.map((issue) => issue.path)).toContain("step.expires");
+        }
+        expect(validateAgentTalkUnsignedStep(createAsk({ expires: "2026-11-28T10:00:00.250+01:00" })).isValid).toBe(true);
+    });
 });
 
 describe("a step's size", () => {
