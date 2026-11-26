@@ -647,6 +647,12 @@ For a person with no agent:
 - The link stops working when the ask expires.
 - The same URL serves the markdown and JSON views (section 8.5); each shows only what the opening email says.
 
+For an agent that read the link (the person's own assistant, which does not implement this protocol):
+
+- The markdown view names an answer URL and a filled-in request: a JSON post of the link's token, `result`, `picks` or `text`, and `actor`.
+- `actor` says who answered: `person` when the agent passes on what its person chose, `agent` when it answers for them. A service MUST refuse an answer marked `agent` unless the ask is open to agents (`answerBy: "personOrAgent"`, before `autoUntil`).
+- Such an answer is recorded with `via: "link"` and the declared actor. Nothing proves either, so it waits for the asker's confirmation like any answer through the link.
+
 ## 11. Security considerations
 
 - **Identity** is as strong as the sender's mail domain authentication, the same as for a password reset by email.

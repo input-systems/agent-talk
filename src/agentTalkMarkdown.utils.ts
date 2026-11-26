@@ -1,4 +1,4 @@
-import { AGENT_TALK_STEP_ACTOR } from "./agentTalk.constants.js";
+import { AGENT_TALK_ASK_ANSWER_BY, AGENT_TALK_STEP_ACTOR } from "./agentTalk.constants.js";
 import type { AgentTalkAskStep } from "./agentTalk.types.js";
 import { getAgentTalkAskAutoUntil } from "./agentTalkFreshness.utils.js";
 import { getCanonicalJson } from "./agentTalkJson.utils.js";
@@ -16,9 +16,10 @@ const getMarkdownText = (value: string): string =>
 const getMarkdownToken = (value: string): string => value.replace(/[^A-Za-z0-9._-]/g, "");
 
 // the markdown view of an ask, served from the X-Agent-Talk-Link url to agents that don't speak the protocol.
-// it says only what the email says, plus how to answer
-export const getAgentTalkAskMarkdown = (input: { step: AgentTalkAskStep; answerUrl: string }): string => {
-    const { step, answerUrl } = input;
+// it says only what the email says, plus how to answer: in words by email, or one post to the answer url with the
+// link's token, saying whether the person or their agent answered
+export const getAgentTalkAskMarkdown = (input: { step: AgentTalkAskStep; answer: { url: string; token: string } }): string => {
+    const { step, answer } = input;
     const askerAddress = getMarkdownText(step.by.address);
     const asker = step.by.actor === AGENT_TALK_STEP_ACTOR.AGENT ? `${askerAddress} (written by their agent)` : askerAddress;
     const askedAddresses = step.to.map(getMarkdownText).join(", ");
@@ -35,6 +36,16 @@ export const getAgentTalkAskMarkdown = (input: { step: AgentTalkAskStep; answerU
     );
 
     const requestedScopeLines = (step.requestedScopes ?? []).map((scope) => `- \`${getMarkdownToken(scope)}\``);
+
+    const isPersonOnly = step.answerBy === AGENT_TALK_ASK_ANSWER_BY.PERSON;
+    const [firstOption] = step.options ?? [];
+    const exampleBody = {
+        token: answer.token,
+        result: "answered",
+        picks: firstOption ? [getMarkdownToken(firstOption.id)] : [],
+        text: firstOption ? null : "Your answer in words",
+        actor: isPersonOnly ? AGENT_TALK_STEP_ACTOR.PERSON : AGENT_TALK_STEP_ACTOR.AGENT,
+    };
 
     const allowed = [
         step.can.counter ? "suggest something else" : null,
@@ -55,10 +66,19 @@ export const getAgentTalkAskMarkdown = (input: { step: AgentTalkAskStep; answerU
         [
             "## Answering",
             "",
-            "- Reply to the email in plain words, or",
-            `- send an \`answer\` step (Agent Talk v1) to ${answerUrl}`,
+            "- Reply to the email in plain words, or post JSON to the answer url:",
+            "",
+            // the url and the token are the service's own, never the asker's
+            `\`POST ${answer.url}\``,
+            "",
+            `\`${JSON.stringify(exampleBody)}\``,
+            "",
+            "- `picks` are option ids; `result` is `answered` or `declined`. `actor` says who answered: `person` when they chose it, `agent` when you answer for them.",
+            isPersonOnly
+                ? `- Only ${askedAddresses} can answer this: show it to them and send what they chose. An answer marked \`agent\` is refused.`
+                : `- Agents may answer on their own until ${getAgentTalkAskAutoUntil(step).toISOString()}; after that a person decides.`,
             allowed.length > 0 ? `- You may also ${allowed.join(", ")}.` : null,
-            `- Open until ${getMarkdownText(step.expires)}. Agents may answer on their own until ${getAgentTalkAskAutoUntil(step).toISOString()}; after that a person decides.`,
+            `- Open until ${getMarkdownText(step.expires)}. The asker confirms an answer given here before it takes effect.`,
         ]
             .filter((line): line is string => line !== null)
             .join("\n"),

@@ -10,6 +10,8 @@ Agent Talk no longer binds to A2A. Between services:
 - Schemas: added `service-document.schema.json` and `direct-body.schema.json`. Vectors: `agent-cards.json` replaced by `service-documents.json` and `direct-bodies.json`; `service-tokens.json` uses a carrier URL as its audience.
 - Reference implementation synced: `agentTalkServiceDocument.utils.ts` and `agentTalkDirect.utils.ts` replace the A2A and Agent Card helpers.
 
+Agents that read a link: the markdown view now gives an answer URL and a filled-in request, and an answer through the link declares `actor`. An answer marked `agent` is refused unless the ask is open to agents; every link answer still waits for the asker's confirmation (section 10).
+
 ## 1.0.0-draft.1
 
 First public draft of the protocol, the A2A extension, the JSON Schemas, the test vectors and the TypeScript reference implementation.
